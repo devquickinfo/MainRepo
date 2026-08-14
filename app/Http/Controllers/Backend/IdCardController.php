@@ -15,23 +15,26 @@ class IdCardController extends Controller
     public function index(Request $request)
     {
         $schoolId = Auth::user()->school_id;
-
         $classes = StudentClass::
             orderBy('id', 'ASC')
             ->get();
-
         $sections = Section::selectRaw('MIN(id) as id, name')
             ->groupBy('name')
             ->orderBy('id', 'ASC')
             ->get();
-
+        if($request->has('per_page') && is_numeric($request->input('per_page'))){
+            $perPage = (int)$request->input('per_page');
+        } else {
+            $perPage = 20; 
+        }
         $students = $this->buildStudentQuery($request, $schoolId)
-            ->paginate(20);
+            ->paginate($perPage);
 
         return view('schools.createidcard', compact(
             'classes',
             'sections',
-            'students'
+            'students',
+            'perPage',
         ));
     }
 

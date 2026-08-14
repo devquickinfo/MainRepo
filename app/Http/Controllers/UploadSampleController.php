@@ -26,33 +26,65 @@ class UploadSampleController extends Controller
     //     $alls=UploadSample::all();
     //     return view('schools.uploadsample',compact('alls', 'selectedSample'));
     // }
+    // public function index()
+    // {
+    //     $selectedSample = null;
+
+    //     if (session('role') === 'school') {
+
+    //         $schoolId = Auth::user()->school_id;
+
+    //         $selectedSample = SelectedSample::where(
+    //             'school_id',
+    //             $schoolId
+    //         )->first();
+
+    //         $alls = UploadSample::where(function ($query) use ($schoolId) {
+    //             $query->whereNull('school_id')
+    //                 ->orWhere('school_id', $schoolId);
+    //         })->get();
+
+    //     } else {
+
+    //         // Admin sees all samples
+    //         $alls = UploadSample::all();
+    //     }
+
+    //     return view(
+    //         'schools.uploadsample',
+    //         compact('alls', 'selectedSample')
+    //     );
+    // }
     public function index()
     {
         $selectedSample = null;
-
+        $alls = collect();
+        $defaultSamples = collect();
+        $ownSamples = collect();
         if (session('role') === 'school') {
-
             $schoolId = Auth::user()->school_id;
-
             $selectedSample = SelectedSample::where(
                 'school_id',
                 $schoolId
             )->first();
-
-            $alls = UploadSample::where(function ($query) use ($schoolId) {
-                $query->whereNull('school_id')
-                    ->orWhere('school_id', $schoolId);
-            })->get();
-
+            // Admin/default samples
+            $defaultSamples = UploadSample::whereNull('school_id')
+                ->get();
+            // Samples uploaded by this school
+            $ownSamples = UploadSample::where('school_id', $schoolId)
+                ->get();
         } else {
-
             // Admin sees all samples
             $alls = UploadSample::all();
         }
-
         return view(
             'schools.uploadsample',
-            compact('alls', 'selectedSample')
+            compact(
+                'alls',
+                'defaultSamples',
+                'ownSamples',
+                'selectedSample'
+            )
         );
     }
 
@@ -167,13 +199,15 @@ class UploadSampleController extends Controller
     }
     public function destroyAll()
     {
-        $samples = UploadSample::all();
-
+        if(session('role') === 'school') {
+            $samples = UploadSample::where('school_id', Auth::user()->school_id)->get();
+        } else {
+            $samples = UploadSample::whereNull('school_id')->get();
+        }
         foreach ($samples as $sample) {
             Storage::disk('public')->delete($sample->file_path);
             $sample->delete();
         }
-
         return redirect()
             ->route('upload-samples.index')
             ->with('success', 'All samples deleted successfully.');

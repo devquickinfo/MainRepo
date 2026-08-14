@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use App\Models\SelectedSample;
+use App\Models\UploadSample;
 
 class StudentController extends Controller
 {
@@ -27,7 +29,6 @@ class StudentController extends Controller
             ->groupBy('name')
             ->orderBy('id', 'ASC')
             ->get();
-
         return view('frontend.addstudent', compact('students', 'classes', 'sections'));
     }
 
@@ -39,8 +40,14 @@ class StudentController extends Controller
         $classes = StudentClass::all();
         $sections = Section::all();
         $students = Student::with(['studentClass', 'section'])->latest()->paginate(10);
+        $school_id = Auth::user()->school_id;
+        $selectedSample = SelectedSample::where('school_id', $school_id)->first();
+        $idcardsample = null;
+        if ($selectedSample) {
+            $idcardsample = UploadSample::where('id', $selectedSample->sample_id)->first();
+        }
 
-        return view('frontend.addstudent', compact('students', 'classes', 'sections'));
+        return view('frontend.addstudent', compact('students', 'classes', 'sections', 'idcardsample'));
     }
 
     /**
@@ -155,7 +162,8 @@ class StudentController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $student = Student::with(['studentClass', 'section'])->findOrFail($id);
+        return view('frontend.studentshow', compact('student'));
     }
 
     /**
@@ -170,230 +178,106 @@ class StudentController extends Controller
             ->orderBy('id', 'ASC')
             ->get();
         $students = Student::with(['studentClass', 'section'])->latest()->paginate(10);
+        $school_id = Auth::user()->school_id;
+        $idcardsample = null;
+        $selectedSample = SelectedSample::where('school_id', $school_id)->first();
+        if ($selectedSample) {
+            $idcardsample = UploadSample::where('id', $selectedSample->sample_id)->first();
+        }
+
 
         return view('frontend.addstudent', compact(
             'student',
             'students',
             'classes',
-            'sections'
+            'sections',
+            'idcardsample'
         ));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    // public function update(Request $request, string $id)
-    // {
-    //     $student = Student::findOrFail($id);
-    //     $validator = Validator::make($request->all(),[
-    //         'admission_no' => 'required|unique:students,admission_no,' . $student->id,
-    //         'first_name'   => 'required',
-    //         'father_name'  => 'required',
-    //         'date_of_birth' => 'required|date',
-    //         'gender'       => 'required',
-    //         'class_id'     => 'required',
-    //         'section_id'   => 'required',
-    //         'photo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
-    //     ]);
-    //     if ($validator->fails()) {
-    //         return redirect()
-    //             ->back()
-    //             ->withErrors($validator)
-    //             ->withInput();
-    //     }
-    //     $photo = $student->photo;
-    //     $capturePhoto = $student->capturephoto;
-    //     $capturedByCamera = $student->captured_by_camera;
-
-    //     // New camera capture
-    //     if ($request->filled('photo_data')) {
-    //         if ($photo && Storage::disk('public')->exists($photo)) {
-    //             Storage::disk('public')->delete($photo);
-    //         }
-
-    //         if ($capturePhoto && Storage::disk('public')->exists($capturePhoto)) {
-    //             Storage::disk('public')->delete($capturePhoto);
-    //         }
-
-    //         $image = str_replace('data:image/png;base64,', '', $request->photo_data);
-    //         $image = str_replace(' ', '+', $image);
-
-    //         $imageName = time() . '.png';
-
-    //         Storage::disk('public')->put(
-    //             'capture-photo/' . $imageName,
-    //             base64_decode($image)
-    //         );
-
-    //         $capturePhoto = 'capture-photo/' . $imageName;
-    //         $photo = null;
-    //         $capturedByCamera = true;
-    //     }
-
-    //     // New uploaded file
-    //     elseif ($request->hasFile('photo')) {
-    //         if ($photo && Storage::disk('public')->exists($photo)) {
-    //             Storage::disk('public')->delete($photo);
-    //         }
-
-    //         if ($capturePhoto && Storage::disk('public')->exists($capturePhoto)) {
-    //             Storage::disk('public')->delete($capturePhoto);
-    //         }
-
-    //         $photo = $request->file('photo')->store('student-photo', 'public');
-    //         $capturePhoto = null;
-    //         $capturedByCamera = false;
-    //     }
-
-    //     $student->update([
-    //         'admission_no'       => $request->admission_no,
-    //         'first_name'         => $request->first_name,
-    //         'last_name'          => $request->last_name,
-    //         'father_name'        => $request->father_name,
-    //         'address'            => $request->address,
-    //         'gender'             => $request->gender,
-    //         'date_of_birth'      => $request->date_of_birth,
-    //         'blood_group'        => $request->blood_group,
-    //         'phone'              => $request->phone,
-    //         'class_id'           => $request->class_id,
-    //         'section_id'         => $request->section_id,
-    //         'photo'              => $photo,
-    //         'capturephoto'       => $capturePhoto,
-    //         'capture_background' => $request->capture_background ?? 'Sky Blue',
-    //         'captured_by_camera' => $capturedByCamera,
-    //     ]);
-
-    //     return redirect()
-    //         ->route('students.index')
-    //         ->with('success', 'Student updated successfully.');
-    // }
-    
-        public function update(Request $request, string $id)
-        {
-            $student = Student::findOrFail($id);
-
-            $validator = Validator::make($request->all(), [
-                'admission_no'  => 'required|unique:students,admission_no,' . $student->id,
-                'first_name'    => 'required',
-                'father_name'   => 'required',
-                'date_of_birth' => 'required|date',
-                'gender'        => 'required',
-                'class_id'      => 'required',
-                'section_id'    => 'required',
-                'photo'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()
-                    ->back()
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            // Keep existing values
-            $photo = $student->photo;
-            $capturePhoto = $student->capturephoto;
-            $capturedByCamera = $student->captured_by_camera;
-
-            /*
-            |--------------------------------------------------------------------------
-            | New Camera Capture
-            |--------------------------------------------------------------------------
-            */
-            if ($request->filled('photo_data')) {
-
-                // Delete ONLY old capture photo
-                if (
-                    $capturePhoto &&
-                    Storage::disk('public')->exists($capturePhoto)
-                ) {
-                    Storage::disk('public')->delete($capturePhoto);
-                }
-
-                $image = str_replace(
-                    'data:image/png;base64,',
-                    '',
-                    $request->photo_data
-                );
-
-                $image = str_replace(' ', '+', $image);
-
-                $imageName = time() . '.png';
-
-                Storage::disk('public')->put(
-                    'capture-photo/' . $imageName,
-                    base64_decode($image)
-                );
-
-                $capturePhoto = 'capture-photo/' . $imageName;
-
-                // IMPORTANT:
-                // Keep existing uploaded photo
-                $capturedByCamera = true;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | New Uploaded Photo
-            |--------------------------------------------------------------------------
-            */
-            elseif ($request->hasFile('photo')) {
-
-                // Delete ONLY old uploaded photo
-                if (
-                    $photo &&
-                    Storage::disk('public')->exists($photo)
-                ) {
-                    Storage::disk('public')->delete($photo);
-                }
-
-                // Save new uploaded photo
-                $photo = $request->file('photo')->store(
-                    'student-photo',
-                    'public'
-                );
-
-                // IMPORTANT:
-                // Keep existing capture photo
-                $capturedByCamera = false;
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Update Student
-            |--------------------------------------------------------------------------
-            */
-            $student->update([
-                'admission_no'       => $request->admission_no,
-                'first_name'         => $request->first_name,
-                'last_name'          => $request->last_name,
-                'father_name'        => $request->father_name,
-                'address'            => $request->address,
-                'gender'             => $request->gender,
-                'date_of_birth'      => $request->date_of_birth,
-                'blood_group'        => $request->blood_group,
-                'phone'              => $request->phone,
-                'class_id'           => $request->class_id,
-                'section_id'         => $request->section_id,
-
-                // Both values are preserved
-                'photo'              => $photo,
-                'capturephoto'       => $capturePhoto,
-
-                'capture_background' => $request->capture_background ?? 'Sky Blue',
-                'captured_by_camera' => $capturedByCamera,
-            ]);
-
-            // return redirect()
-            //     ->route('students.index')
-            //     ->with('success', 'Student updated successfully.');
-          return redirect()
-            ->route('schools.classes.students', [
-                'school' => Auth::user()->school_id,
-                'class'  => $student->class_id,
-            ])
-            ->with('success', 'Student updated successfully.');
+    public function update(Request $request, string $id)
+    {
+        $student = Student::findOrFail($id);
+        $validator = Validator::make($request->all(), [
+            'admission_no'  => 'required|unique:students,admission_no,' . $student->id,
+            'first_name'    => 'required',
+            'father_name'   => 'required',
+            'date_of_birth' => 'required|date',
+            'gender'        => 'required',
+            'class_id'      => 'required',
+            'section_id'    => 'required',
+            'photo'         => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+        if ($validator->fails()) {
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
         }
+        $photo = $student->photo;
+        $capturePhoto = $student->capturephoto;
+        $capturedByCamera = $student->captured_by_camera;
+        if ($request->filled('photo_data')) {
+            if (
+                $capturePhoto &&
+                Storage::disk('public')->exists($capturePhoto)
+            ) {
+                Storage::disk('public')->delete($capturePhoto);
+            }
+            $image = str_replace(
+                'data:image/png;base64,',
+                '',
+                $request->photo_data
+            );
+            $image = str_replace(' ', '+', $image);
+            $imageName = time() . '.png';
+            Storage::disk('public')->put(
+                'capture-photo/' . $imageName,
+                base64_decode($image)
+            );
+            $capturePhoto = 'capture-photo/' . $imageName;
+            $capturedByCamera = true;
+        }
+        elseif ($request->hasFile('photo')) {
+            if (
+                $photo &&
+                Storage::disk('public')->exists($photo)
+            ) {
+                Storage::disk('public')->delete($photo);
+            }
+            $photo = $request->file('photo')->store(
+                'student-photo',
+                'public'
+            );
+            $capturedByCamera = false;
+        }
+        $student->update([
+            'admission_no'       => $request->admission_no,
+            'first_name'         => $request->first_name,
+            'last_name'          => $request->last_name,
+            'father_name'        => $request->father_name,
+            'address'            => $request->address,
+            'gender'             => $request->gender,
+            'date_of_birth'      => $request->date_of_birth,
+            'blood_group'        => $request->blood_group,
+            'phone'              => $request->phone,
+            'class_id'           => $request->class_id,
+            'section_id'         => $request->section_id,
+            'photo'              => $photo,
+            'capturephoto'       => $capturePhoto,
+            'capture_background' => $request->capture_background ?? 'Sky Blue',
+            'captured_by_camera' => $capturedByCamera,
+        ]);
+        return redirect()
+        ->route('schools.classes.students', [
+            'school' => Auth::user()->school_id,
+            'class'  => $student->class_id,
+        ])
+        ->with('success', 'Student updated successfully.');
+    }
 
 
 
@@ -403,34 +287,35 @@ class StudentController extends Controller
     public function destroy(string $id)
     {
         $student = Student::findOrFail($id);
-        $student->delete();
-        return redirect()->route('students.index')
-            ->with('success','Student Deleted Successfully');
+        //$student->delete();
+        $student->IsDeleted = '1';
+        $student->save();
+        $referer = request()->header('referer');
+        if ($referer && preg_match('#/students/\d+$#', parse_url($referer, PHP_URL_PATH))) {
+            return redirect('/student/list')
+                ->with('success', 'Student Deleted Successfully');
+        }
+        return redirect()->back()
+            ->with('success', 'Student Deleted Successfully');
     }
     public function getSections($classId)
     {
-        $sections = Section::where('class_id', $classId)
-            ->orderBy('name')
-            ->get();
-
+        $sections = Section::orderBy('id', 'ASC')->get();
         return response()->json($sections);
     }
 
     public function schoolClasses()
     {
         $user = Auth::user();
-
-        // Sections are global; load all sections for each class
-        $classes = StudentClass::with('sections')->get();
-
-        return view('frontend.school_classes', compact('classes'));
+        $classes = StudentClass::orderBy('id', 'ASC')->get();
+        $sections = Section::orderBy('id', 'ASC')->get();
+        return view('frontend.school_classes', compact('classes', 'sections'));
     }
 
     public function classSectionStudents($classId, $sectionId)
     {
         $class = StudentClass::findOrFail($classId);
         $section = Section::findOrFail($sectionId);
-
         $students = Student::where('class_id', $classId)
             ->where('section_id', $sectionId)
             ->orderBy('first_name')
@@ -439,105 +324,49 @@ class StudentController extends Controller
         return view('frontend.class_section_students', compact('class', 'section', 'students'));
     }
 
-  
     public function classStudents(Request $request, $schoolId, $classId)
     {
         $school = School::findOrFail($schoolId);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Determine Selected Class
-        |--------------------------------------------------------------------------
-        */
-
         $selectedClassId = $request->filled('class')
             ? $request->class
             : $classId;
-
         $class = StudentClass::where('school_id', $school->id)
             ->findOrFail($selectedClassId);
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Classes
-        |--------------------------------------------------------------------------
-        */
-
-        $classes = StudentClass::where('school_id', $school->id)
-            ->orderBy('id')
-            ->get();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Students Query
-        |--------------------------------------------------------------------------
-        */
-
+        $classes = StudentClass::all();
         $studentsQuery = Student::with([
                 'studentClass',
                 'section'
             ])
             ->where('school_id', $school->id)
             ->where('class_id', $class->id)
+            ->where('IsDeleted', '0')
             ->orderBy('first_name');
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Section Filter
-        |--------------------------------------------------------------------------
-        */
-
         if ($request->filled('section')) {
             $studentsQuery->where(
                 'section_id',
                 $request->section
             );
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Capture Photo Filter
-        |--------------------------------------------------------------------------
-        */
-
         if ($request->filled('photo_filter')) {
-
             if ($request->photo_filter === 'with_photo') {
-
                 $studentsQuery->where(function ($query) {
                     $query->whereNotNull('capturephoto')
                         ->where('capturephoto', '!=', '');
                 });
-
             } elseif ($request->photo_filter === 'without_photo') {
-
                 $studentsQuery->where(function ($query) {
                     $query->whereNull('capturephoto')
                         ->orWhere('capturephoto', '');
                 });
             }
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Student Photo Filter
-        |--------------------------------------------------------------------------
-        */
-
         if ($request->filled('student_photo')) {
-
             if ($request->student_photo === 'with_photo') {
-
                 $studentsQuery->where(function ($query) {
                     $query->whereNotNull('photo')
                         ->where('photo', '!=', '');
                 });
-
             } elseif ($request->student_photo === 'without_photo') {
 
                 $studentsQuery->where(function ($query) {
@@ -546,30 +375,15 @@ class StudentController extends Controller
                 });
             }
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Sections
-        |--------------------------------------------------------------------------
-        */
-
-        $sections = Section::where('school_id', $school->id)
-            ->orderBy('name')
-            ->get();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Pagination
-        |--------------------------------------------------------------------------
-        */
-
+        $sections = Section::orderBy('id','asc')->get();
+        if($request->per_page){
+            $perPage = $request->per_page;
+        }else{
+            $perPage = 10;
+        }
         $students = $studentsQuery
-            ->paginate(10)
+            ->paginate($perPage)
             ->appends($request->query());
-
-
         return view(
             'frontend.class_students',
             compact(
@@ -580,6 +394,53 @@ class StudentController extends Controller
                 'classes'
             )
         );
+    }
+    public function capturePhoto(Request $request, string $id)
+    {
+        $student = Student::findOrFail($id);
+        $request->validate([
+            'photo_data' => 'required|string',
+            'capture_background' => 'nullable|string',
+        ]);
+        if (
+            $student->capturephoto &&
+            Storage::disk('public')->exists($student->capturephoto)
+        ) {
+            Storage::disk('public')->delete($student->capturephoto);
+        }
+        $image = $request->photo_data;
+        $image = preg_replace(
+            '/^data:image\/\w+;base64,/',
+            '',
+            $image
+        );
+        $image = str_replace(' ', '+', $image);
+        $imageName = time() . '_' . $student->id . '.png';
+        Storage::disk('public')->put(
+            'capture-photo/' . $imageName,
+            base64_decode($image)
+        );
+        $student->update([
+            'capturephoto' => 'capture-photo/' . $imageName,
+            'capture_background' => $request->capture_background ?? '#dbeafe',
+            'captured_by_camera' => true,
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Photo captured successfully.'
+        ]);
+    }
+    public function cardStatus(string $id)
+    {
+        $student = Student::findOrFail($id);
+        if ($student->idcardprinted === 'no') {
+            $student->idcardprinted = 'yes';
+        } else {
+            $student->idcardprinted = 'no';
+        }
+        $student->save();
+        return redirect()->back()
+            ->with('success', 'Student ID card status updated successfully.');
     }
 
 

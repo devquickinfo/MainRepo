@@ -29,6 +29,8 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/school/profile', [SchoolController::class, 'profile'])->name('school.profile');
     Route::post('/school/profile', [SchoolController::class, 'updateProfile'])->name('school.profile.update');
+    Route::get('/admin/profile', [SchoolController::class, 'profileAdmin'])->name('admin.profile');
+    Route::post('/admin/profile', [SchoolController::class, 'updateProfileAdmin'])->name('admin.profile.update');
     Route::resource('schools',SchoolController::class);
 
     Route::get('/student/import',
@@ -60,5 +62,13 @@ Route::middleware('auth')->group(function () {
     Route::resource('upload-samples', UploadSampleController::class);
     Route::delete('/upload-sample/all',[UploadSampleController::class, 'destroyAll'])->name('upload-sample.destroyAll');
     Route::post('/save-sample',[SchoolController::class, 'saveSample'])->name('selected-samples.store');
+    Route::post('/student/{student}/capture-photo', [StudentController::class, 'capturePhoto'])
+    ->name('student.capture-photo');
+    Route::get('/student/{student}/cardstatus', [StudentController::class, 'cardStatus'])
+    ->name('student.cardstatus');
+    route::get('/student/deleted', [StudentListController::class, 'deletedStudents'])
+    ->name('student.deleted');
+    route::post('/student/{student}/restore', [StudentListController::class, 'restoreStudent'])
+    ->name('student.restore');
 
 });

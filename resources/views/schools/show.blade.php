@@ -5,7 +5,7 @@
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-6">
+                <!-- <div class="col-sm-6">
                     <h1>School Details</h1>
                 </div>
                 <div class="col-sm-6">
@@ -13,45 +13,170 @@
                         <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
                         <li class="breadcrumb-item active">School</li>
                     </ol>
-                </div>
+                </div> -->
             </div>
         </div>
     </section>
 
     <section class="content">
         <div class="container-fluid">
-            <div class="card">
-                <div class="card-header d-flex align-items-center">
-                    <h3 class="card-title mb-0 badge badge-success">{{ $school->school_name }}</h3>
-                    <h3 class="card-title ml-auto mb-0 badge badge-success">
-                        Principal: {{ $school->principal_name }}
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            @if($school->logo)
-                                <img src="{{ Storage::disk('public')->url($school->logo) }}" alt="School Logo" class="img-thumbnail img-fluid">
+            <div class="card border-0 shadow-sm school-profile-card">
+                <div class="card-header bg-white border-0 px-4 py-3">
+                    <div class="d-flex align-items-center">
+                        <div>
+                            <h4 class="mb-1 font-weight-bold text-dark">
+                                <i class="fas fa-school text-primary mr-2"></i>
+                                {{ $school->school_name }}
+                            </h4>
+
+                            <small class="text-muted">
+                                <i class="fas fa-id-card mr-1"></i>
+                                School Code: {{ $school->school_code }}
+                            </small>
+                        </div>
+                        <div class="ml-auto d-flex align-items-center">
+                            @if($school->status)
+                                <span class="badge badge-success px-3 py-2 mr-2">
+                                    <i class="fas fa-check-circle mr-1"></i> Active
+                                </span>
                             @else
-                                <p>No logo available.</p>
+                                <span class="badge badge-danger px-3 py-2 mr-2">
+                                    <i class="fas fa-times-circle mr-1"></i> Inactive
+                                </span>
                             @endif
-                        </div>
-                        <div class="col-md-4">
-                            <p><strong>School Code:</strong> {{ $school->school_code }}</p>
-                            <p><strong>Email:</strong> {{ $school->email }}</p>
-                            <p><strong>Phone:</strong> {{ $school->phone }}</p>
-                            <p><strong>Address:</strong> {{ $school->address }}</p>
-                        </div>
-                        <div class="col-md-4">
-                            <p><strong>City:</strong> {{ $school->city }}</p>
-                            <p><strong>State:</strong> {{ $school->state }}</p>
-                            <p><strong>Pincode:</strong> {{ $school->pincode }}</p>
-                            <p><strong>Status:</strong> {{ $school->status ? 'Active' : 'Inactive' }}</p>
+                            @if(Auth::user()?->role === 'superadmin')
+                                <a href="{{ route('schools.edit', $school) }}"
+                                class="btn btn-warning btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="card-body px-4 pt-2 pb-4">
+                    <div class="principal-box mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="principal-icon flex-shrink-0">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <div class="ml-3">
+                                <small class="text-muted d-block">
+                                    PRINCIPAL
+                                </small>
+                                <h5 class="mb-0 font-weight-bold">
+                                    {{ $school->principal_name ?: 'Not Available' }}
+                                </h5>
+                            </div>
+                            @if(Auth::user()?->role === 'superadmin')
+                                <a href="{{ route('schools.index') }}"
+                                class="btn btn-info btn-sm ml-auto flex-shrink-0">
+                                    <i class="fas fa-arrow-left"></i>
+                                    <span class="d-none d-sm-inline ml-1">Back</span>
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="row">
 
+                        {{-- Logo --}}
+                        <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
+                            <div class="school-logo-box">
+
+                                @if($school->logo)
+                                    <img src="{{ Storage::disk('public')->url($school->logo) }}"
+                                        alt="School Logo"
+                                        class="school-logo">
+                                @else
+                                    <div class="no-logo">
+                                        <i class="fas fa-school"></i>
+                                        <span>No Logo</span>
+                                    </div>
+                                @endif
+
+                            </div>
+                        </div>
+
+                        {{-- Contact Information --}}
+                        <div class="col-lg-4 col-md-4">
+                            <h6 class="section-title">
+                                <i class="fas fa-address-book mr-2"></i>
+                                Contact Information
+                            </h6>
+
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <small>Email</small>
+                                    <strong>{{ $school->email ?: 'Not Available' }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div>
+                                    <small>Phone</small>
+                                    <strong>{{ $school->phone ?: 'Not Available' }}</strong>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div>
+                                    <small>Address</small>
+                                    <strong>{{ $school->address ?: 'Not Available' }}</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Location --}}
+                        <div class="col-lg-5 col-md-4">
+                            <h6 class="section-title">
+                                <i class="fas fa-map-marked-alt mr-2"></i>
+                                Location
+                            </h6>
+
+                            <div class="row">
+
+                                <div class="col-6">
+                                    <div class="mini-info">
+                                        <small>City</small>
+                                        <strong>{{ $school->city ?: '-' }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mini-info">
+                                        <small>State</small>
+                                        <strong>{{ $school->state ?: '-' }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mini-info">
+                                        <small>Pincode</small>
+                                        <strong>{{ $school->pincode ?: '-' }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <div class="mini-info">
+                                        <small>School Code</small>
+                                        <strong>{{ $school->school_code }}</strong>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
             <div class="card mt-4">
                 <div class="card-header">
                     <h3 class="card-title">Classes & Sections</h3>

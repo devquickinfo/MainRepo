@@ -1,28 +1,38 @@
 @extends('frontend.layout.applayout')
 @section('title', 'School Profile')
 @section('content')
+<style>
+  .school-readonly {
+        background-color: #495057 !important;
+        color: #fff !important;
+        cursor: not-allowed;
+    }
+
+    .school-readonly:hover {
+        background-color: #495057 !important;
+    }
+</style>
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>School Profile</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                        <li class="breadcrumb-item active">Profile</li>
-                    </ol>
-                </div>
+              
             </div>
         </div>
     </section>
-
     <section class="content">
         <div class="container-fluid">
             <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Update your school and account details</h3>
+                <div class="card-header d-flex align-items-center">
+                    <h3 class="card-title mb-0">
+                        Update your school and account details
+                    </h3>
+
+                    <a href="{{ url()->previous() }}"
+                    class="btn btn-secondary btn-sm ml-auto">
+                        <i class="fas fa-arrow-left mr-1"></i>
+                        Back
+                    </a>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('school.profile.update') }}" method="POST" enctype="multipart/form-data">
@@ -31,14 +41,14 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>School Name</label>
-                                    <input type="text" name="school_name" class="form-control" value="{{ old('school_name', $school->school_name) }}" >
+                                    <input type="text" name="school_name" class="form-control {{ Auth::user()?->role === 'school' ? 'school-readonly' : '' }}" value="{{ old('school_name', $school->school_name) }}" @if(Auth::user()?->role === 'school') readonly @endif>
                                     @error('school_name')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
                                 <div class="form-group">
                                     <label>School Code</label>
-                                    <input type="text" name="school_code" class="form-control" value="{{ old('school_code', $school->school_code) }}" >
+                                    <input type="text" name="school_code" class="form-control {{ Auth::user()?->role === 'school' ? 'school-readonly' : '' }}" value="{{ old('school_code', $school->school_code) }}" @if(Auth::user()?->role === 'school') readonly @endif>
                                     @error('school_code')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror

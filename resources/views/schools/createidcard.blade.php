@@ -1,15 +1,67 @@
 @extends('frontend.layout.applayout')
-
 @section('title', 'Create ID Card')
-
 @section('content')
+<style>
+    .pagination-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    }
 
+    .pagination-count {
+        color: #6c757d;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .pagination-links {
+        display: flex;
+        align-items: center;
+    }
+
+    .pagination-links .pagination {
+        margin: 0;
+    }
+
+    .pagination-links .page-link {
+        padding: 4px 9px;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+
+    /* Mobile */
+    @media (max-width: 767.98px) {
+
+        .pagination-wrapper {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pagination-count {
+            width: 100%;
+            text-align: center;
+        }
+
+        .pagination-links {
+            width: 100%;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .pagination-links .page-link {
+            padding: 3px 7px;
+            font-size: 12px;
+        }
+    }
+</style>
 <div class="content-wrapper">
 <!-- Content Header -->
 <section class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
-            <div class="col-sm-6">
+            <!-- <div class="col-sm-6">
                 <h1>Create ID Card</h1>
             </div>
 
@@ -22,7 +74,7 @@
                         Create ID Card
                     </li>
                 </ol>
-            </div>
+            </div> -->
         </div>
     </div>
 </section>
@@ -237,7 +289,7 @@
                         </div>
                     </div>
 
-                </form>
+                <!-- </form> -->
 
             </div>
         </div>
@@ -249,13 +301,25 @@
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-users mr-2"></i>
-                    Students
+                   <span class="badge badge-info">
+                        {{ $students->total() ?? $students->count() }} 
+                    Students  </span> 
                 </h3>
 
-                <div class="card-tools">
-                    <span class="badge badge-info">
+                <div class="card-tools card-tools d-flex align-items-center">
+                
+                        <select name="per_page" class="form-control form-control-sm" onchange="this.form.submit()">
+                            <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                            <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>20</option>
+                            <option value="30" {{ request('per_page') == 30 ? 'selected' : '' }}>30</option>
+                            <option value="40" {{ request('per_page') == 40 ? 'selected' : '' }}>40</option>
+                            <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                            <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                        </select>
+                   
+                    <!-- <span class="badge badge-info">
                         {{ $students->total() ?? $students->count() }} Students
-                    </span>
+                    </span> -->
                 </div>
             </div>
 
@@ -279,9 +343,8 @@
 
                     <div id="selectedStudentIdsContainer"></div>
 
-                    <div class="table-responsive">
-
-                        <table class="table table-bordered table-hover mb-0">
+                    <div class="table-responsive p-0">
+                        <table class="table table-bordered table-hover mb-0 responsive-table">
 
                             <thead>
                                 <tr>
@@ -293,13 +356,12 @@
                                         </div>
                                     </th>
 
-                                    <th width="80">Photo</th>
+                                    <th>Photo</th>
                                     <th>Admission No</th>
                                     <th>Student Name</th>
                                     <th>Father Name</th>
                                     <th>Class</th>
                                     <th>Section</th>
-                                    <!-- <th>Photo</th> -->
                                     <th>ID Card Printed</th>
                                 </tr>
                             </thead>
@@ -307,56 +369,42 @@
                             <tbody id="studentTableBody">
                                 @include('schools.partials.student_rows', ['students' => $students])
                             </tbody>
-
+                     
                         </table>
-
+                           <div class="pagination-wrapper mt-3">
+                                <div class="pagination-count ml-2">
+                                    Showing {{ $students->firstItem() ?? 0 }}
+                                    to {{ $students->lastItem() ?? 0 }}
+                                    of {{ $students->total() }} results
+                                </div>
+                                <div class="pagination-links mr-2">
+                                    {{ $students->withQueryString()->onEachSide(1)->links() }}
+                                </div>
+                            </div>
                     </div>
-
+                     </form>
                     @if(optional($students)->count() > 0)
 
                         <div class="card-footer">
-
                             <div class="row align-items-center">
-
                                 <div class="col-md-6">
-
                                     <span id="selectedCount">
                                         0 students selected
                                     </span>
-
                                 </div>
-
                                 <div class="col-md-6 text-right">
-
                                     <button type="submit"
                                             class="btn btn-success"
                                             id="generateButton">
-
                                         <i class="fas fa-id-card mr-1"></i>
                                         Generate ID Cards
-
                                     </button>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                     @endif
-
                 </form>
-
             </div>
-
-            @if(method_exists($students, 'links'))
-
-                <div class="card-footer">
-                    {{ $students->withQueryString()->links() }}
-                </div>
-
-            @endif
-
         </div>
 
     </div>
@@ -364,6 +412,83 @@
 
 
 </div>
+<div class="modal fade" id="photoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                   Capture Student Photo
+                </h5>
+                <button type="button"
+                        class="close"
+                        data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="modalPhotoContent">
+                    @include('frontend.studentpartials.commoncapture')
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+let selectedStudentId = null;
+$(document).on('click', '.capture-student-btn', function () {
+    selectedStudentId = $(this).attr('data-student-id');
+    console.log('Selected Student ID:', selectedStudentId);
+});
+
+$('#save-capture-photo').on('click', function () {
+    console.log('Student ID:', selectedStudentId);
+    if (!selectedStudentId) {
+        alert('Student ID missing');
+        return;
+    }
+    let photoData = $('#photo_data').val();
+    let background = $('#camera-bg').val();
+    if (!photoData) {
+        alert('Please capture a photo first');
+        return;
+    }
+    let url = "{{ route('student.capture-photo', ':student') }}";
+    url = url.replace(':student', selectedStudentId);
+    console.log('POST URL:', url);
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            photo_data: photoData,
+            capture_background: background
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+        if (data.success) {
+            $('#photoModal').modal('hide');
+            toastr.success(data.message, 'Success');
+            setTimeout(function () {
+             location.reload();
+            }, 1000);
+        } else {
+            alert(data.message || 'Photo could not be saved');
+        }
+
+    })
+    .catch(error => {
+        console.error(error);
+        alert('Error while saving photo.');
+    });
+});
+
+</script>
 @endsection
 
 @push('scripts')

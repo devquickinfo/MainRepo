@@ -24,7 +24,8 @@ class Student extends Model
         'capturephoto',
         'capture_background',
         'captured_by_camera',
-        'idcardprinted'
+        'idcardprinted',
+        'IsDeleted',
     ];
 
     protected $casts = [

@@ -14,16 +14,25 @@
 
         <td class="text-center">
             @if($student->photo)
-                <img src="{{ asset('storage/' . $student->photo) }}"
-                     alt="Student Photo"
-                     width="50"
-                     height="50"
-                     class="img-circle"
-                     style="object-fit: cover;">
+                <a href="{{ asset('storage/' . $student->photo) }}" target="_blank">
+                    <img src="{{ asset('storage/' . $student->photo) }}"
+                        alt="Student Photo"
+                        style="width: 50px; height: 50px; object-fit: cover;" class="img-thumbnail rounded-circle">
+                </a>
+            @elseif($student->capturephoto)
+                <a href="{{ asset('storage/' . $student->capturephoto) }}" target="_blank">
+                    <img src="{{ asset('storage/' . $student->capturephoto) }}"
+                        alt="Student Photo"
+                        style="width: 50px; height: 50px; object-fit: cover;" class="img-thumbnail">
+                </a>
             @else
-                <div class="text-muted">
-                    <i class="fas fa-user-circle fa-2x"></i>
-                </div>
+                <button type="button"
+                        class="btn btn-sm btn-link text-white capture-student-btn"
+                        data-toggle="modal"
+                        data-target="#photoModal"
+                        data-student-id="{{ $student->id }}">
+                    Add Photo
+                </button>
             @endif
         </td>
 
@@ -33,11 +42,25 @@
         <td>{{ $student->studentClass->name ?? '-' }}</td>
         <td>{{ $student->section->name ?? '-' }}</td>
         <td>
-            @if($student->idcardprinted === 'yes')
-                <span class="badge badge-success">Yes</span>
+           {{--- @if($student->idcardprinted === 'yes')
+                <button type="button"
+                        class="btn btn-sm btn-success"
+                        data-toggle="modal"
+                        data-target="#photoModal"
+                        data-student-id="{{ $student->id }}"
+                        data-photo="">
+                    Yes
+                </button>
             @else
-                <span class="badge badge-danger">No</span>
-            @endif
+               <button type="button"
+                        class="btn btn-sm btn-danger"
+                        data-toggle="modal"
+                        data-target="#photoModal"
+                        data-student-id="{{ $student->id }}"
+                        data-photo="{{ asset('storage/' . $student->capturephoto) }}">
+                   No
+                </button>
+            @endif----}}
         </td>
     </tr>
 @empty

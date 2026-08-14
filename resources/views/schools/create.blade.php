@@ -39,7 +39,7 @@
                     <div class="col-md-3">
                       <div class="form-group">
                         <label for="school_code">School Code</label>
-                        <input type="text" name="school_code" class="form-control" id="school_code" placeholder="Enter School Code">
+                        <input type="text" name="school_code" class="form-control" id="school_code" placeholder="Enter School Code" value="{{ old('school_code') }}">
                       </div>
                        @error('school_code')
                             <span class="text-danger">{{ $message }}</span>
@@ -48,7 +48,7 @@
                     <div class="col-md-3">
                       <div class="form-group">
                         <label for="school_name">School Name</label>
-                        <input type="text" name="school_name" class="form-control" id="school_name" placeholder="Enter School Name">
+                        <input type="text" name="school_name" class="form-control" id="school_name" placeholder="Enter School Name" value="{{ old('school_name') }}">
                       </div>
                        @error('school_name')
                             <span class="text-danger">{{ $message }}</span>
@@ -57,7 +57,7 @@
                     <div class="col-md-3">
                       <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" name="email" class="form-control" id="email" placeholder="Enter Email">
+                        <input type="email" name="email" class="form-control" id="email" placeholder="Enter Email" value="{{ old('email') }}">
                       </div>
                        @error('email')
                             <span class="text-danger">{{ $message }}</span>
@@ -66,7 +66,7 @@
                     <div class="col-md-3">                    
                       <div class="form-group">
                         <label for="phone">Phone</label>
-                        <input type="text" name="phone" class="form-control" id="phone" placeholder="Enter Phone">
+                        <input type="text" name="phone" class="form-control" id="phone" placeholder="Enter Phone" value="{{ old('phone') }}">
                       </div>
                        @error('phone')
                             <span class="text-danger">{{ $message }}</span>
@@ -93,25 +93,25 @@
                     <div class="col-md-3">
                       <div class="form-group">
                         <label for="city">City</label>
-                        <input type="text" name="city" class="form-control" id="city" placeholder="Enter City">
+                        <input type="text" name="city" class="form-control" id="city" placeholder="Enter City" value="{{ old('city') }}">
                       </div>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
                         <label for="state">State</label>
-                        <input type="text" name="state" class="form-control" id="state" placeholder="Enter State">
+                        <input type="text" name="state" class="form-control" id="state" placeholder="Enter State" value="{{ old('state') }}">
                       </div>
                     </div>
                     <div class="col-md-3">
                       <div class="form-group">
                         <label for="pincode">Pincode</label>
-                        <input type="text" name="pincode" class="form-control" id="pincode" placeholder="Enter Pincode">
+                        <input type="text" name="pincode" class="form-control" id="pincode" placeholder="Enter Pincode" value="{{ old('pincode') }}">
                       </div>
                     </div>
                     <div class="col-md-12">
                       <div class="form-group">
                         <label for="address">School Address</label>
-                        <textarea name="address" class="form-control" id="address" rows="5" placeholder="Enter School Address"></textarea>
+                        <textarea name="address" class="form-control" id="address" rows="5" placeholder="Enter School Address">{{ old('address') }}</textarea>
                       </div>
                     </div>
                 </div>

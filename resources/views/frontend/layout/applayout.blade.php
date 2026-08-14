@@ -14,10 +14,16 @@
   <link rel="stylesheet" href="{{asset('frontend/plugins/overlayScrollbars/css/OverlayScrollbars.min.css')}}">
   <!-- Theme style -->
   <link rel="stylesheet" href="{{asset('frontend/dist/css/adminlte.min.css')}}">
+  <link rel="stylesheet" href="{{asset('css/app.css')}}">
   <link rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.css">
+      <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
-    /* .content-wrapper {
+     .content-wrapper {
         margin-left: 0 !important;
     }
     .main-header {
@@ -25,134 +31,98 @@
     }
     .main-footer {
         margin-left: 0 !important;
-    } */
+    } 
   </style>
 </head>
 <body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed text-sm">
+  
 <div class="wrapper">
   <!-- Navbar -->
-  <nav class="main-header navbar navbar-expand navbar-dark">
-    <!-- Left navbar links -->
-    <ul class="navbar-nav">
-      <li class="nav-item">
-        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="{{url('/dashboard')}}" class="nav-link">Home</a>
-      </li>
-      <li class="nav-item d-none d-sm-inline-block">
-        <a href="#" class="nav-link">Contact</a>
-      </li>
+  <nav class="main-header navbar navbar-expand-md navbar-dark">
+    <a href="{{ route('dashboard') }}" class="navbar-brand">
+      <img src="{{asset('frontend/dist/img/schoolid.jpg')}}" alt="School ID Logo" class="brand-image img-circle elevation-3" style="opacity: .8; width: 30px; height: 30px; object-fit: cover;">
+      <span class="brand-text text-white">School ID Card</span>
+    </a>
+    <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+      <div class="d-md-none w-100 text-right mb-2">
+        <button class="btn btn-sm btn-outline-light" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="true" aria-label="Close navigation">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <ul class="navbar-nav">
+          <li class="nav-item ml-md-3">
+            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                Dashboard
+            </a>
+          </li>
+          @if(session('role') === 'superadmin')
+          <li class="nav-item">
+            <a href="{{ route('student.deleted') }}" class="nav-link {{ request()->routeIs('student.deleted') ? 'active' : '' }}">
+                Deleted Students
+            </a>
+          </li>
+          @endif
+          @if(session('role') !== 'school')
+          <li class="nav-item">
+            <a href="{{ Auth::user()->role === 'school' ? route('schools.show', Auth::user()->school_id) : route('schools.index') }}" class="nav-link {{ request()->routeIs('schools.*') ? 'active' : '' }}">
+                School
+            </a>
+          </li>
+          @endif
+          @if(session('role') === 'school')
+          {{--<li class="nav-item">
+            <a href="{{ route('students.index') }}" class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
+               Add New Student
+            </a>
+          </li>--}}
+          <li class="nav-item">
+            <a href="{{ route('student.list') }}" class="nav-link">
+              Student
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('idcard.create') }}" class="nav-link">
+                Create ID Card
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('student.import') }}" class="nav-link {{ request()->routeIs('students.import.*') ? 'active' : '' }}">
+               Import Students
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('teacher.list') }}" class="nav-link">
+                Teachers
+            </a>
+          </li>
+          @endif
+          <li class="nav-item">
+              <a href="{{ route('upload-samples.index') }}"
+                class="nav-link {{ request()->routeIs('upload-samples.*') ? 'active' : '' }}">
+                    @if(session('role') === 'school')
+                    Card Sample
+                    @else
+                      Upload Sample
+                    @endif
+              </a>
+          </li>
     </ul>
-
-    <!-- Right navbar links -->
+   
     <ul class="navbar-nav ml-auto">
-      <!-- Navbar Search -->
-      <li class="nav-item">
-        <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-          <i class="fas fa-search"></i>
-        </a>
-        <div class="navbar-search-block">
-          <form class="form-inline">
-            <div class="input-group input-group-sm">
-              <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-              <div class="input-group-append">
-                <button class="btn btn-navbar" type="submit">
-                  <i class="fas fa-search"></i>
-                </button>
-                <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                  <i class="fas fa-times"></i>
-                </button>
-              </div>
-            </div>
-          </form>
-        </div>
-      </li>
-
-      <!-- Messages Dropdown Menu -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-comments"></i>
-          <span class="badge badge-danger navbar-badge">3</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-              <img src="{{asset('frontend/dist/img/user1-128x128.jpg')}}" alt="User Avatar" class="img-size-50 mr-3 img-circle">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Brad Diesel
-                  <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">Call me whenever you can...</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
+      <li class="nav-item d-flex align-items-center">
+          <a class="nav-link p-0 d-flex align-items-center" href="#">
+              @if(Auth::user()->profilepicture)
+                  <img src="{{ asset('storage/' . Auth::user()->profilepicture) }}"
+                      alt="Profile"
+                      class="img-circle elevation-2"
+                      style="width: 32px; height: 32px; object-fit: cover; display: block;">
+              @else
+                  <i class="fas fa-user-circle fa-lg"></i>
+              @endif
           </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-              <img src="{{asset('frontend/dist/img/user8-128x128.jpg')}}" alt="User Avatar" class="img-size-50 img-circle mr-3">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  John Pierce
-                  <span class="float-right text-sm text-muted"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">I got your message bro</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <!-- Message Start -->
-            <div class="media">
-              <img src="{{asset('frontend/dist/img/user3-128x128.jpg')}}" alt="User Avatar" class="img-size-50 img-circle mr-3">
-              <div class="media-body">
-                <h3 class="dropdown-item-title">
-                  Nora Silvester
-                  <span class="float-right text-sm text-warning"><i class="fas fa-star"></i></span>
-                </h3>
-                <p class="text-sm">The subject goes here</p>
-                <p class="text-sm text-muted"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-              </div>
-            </div>
-            <!-- Message End -->
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-        </div>
-      </li>
-      <!-- Notifications Dropdown Menu -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="#">
-          <i class="far fa-bell"></i>
-          <span class="badge badge-warning navbar-badge">15</span>
-        </a>
-        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-          <span class="dropdown-item dropdown-header">15 Notifications</span>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-envelope mr-2"></i> 4 new messages
-            <span class="float-right text-muted text-sm">3 mins</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-users mr-2"></i> 8 friend requests
-            <span class="float-right text-muted text-sm">12 hours</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-            <span class="float-right text-muted text-sm">2 days</span>
-          </a>
-          <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
-        </div>
       </li>
       <li class="nav-item dropdown">
         <a class="nav-link" data-toggle="dropdown" href="#">
@@ -160,17 +130,20 @@
         </a>
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
           <div class="dropdown-divider"></div>
+          @if(Auth::user()?->role === 'school')
           <a href="{{ route('school.profile') }}" class="dropdown-item">
             <i class="fas fa-school mr-2"></i> School Profile
           </a>
+          @else
+          <a href="{{ route('admin.profile') }}" class="dropdown-item">
+            <i class="fas fa-user mr-2"></i>Profile
+          </a>
+          @endif
           <div class="dropdown-divider"></div>
           <a href="{{ route('user.logout') }}" class="dropdown-item">
             <i class="fas fa-sign-out-alt mr-2"></i> Logout
           </a>
           <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new reports
-          </a>
         </div>
       </li>
       <!-- <li class="nav-item">
@@ -183,7 +156,7 @@
   <!-- /.navbar -->
 
   <!-- Main Sidebar Container -->
-  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <a href="{{ route('dashboard') }}" class="brand-link">
       <img src="{{asset('frontend/dist/img/schoolid.jpg')}}" alt="School ID Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light">School ID Card</span>
@@ -267,7 +240,7 @@
         </ul>
       </nav>
     </div>
-  </aside>
+  </aside> -->
 
 
 
@@ -287,49 +260,35 @@
   <!-- /.control-sidebar -->
 
   <!-- Main Footer -->
-<!--   <footer class="main-footer">
+  <footer class="main-footer">
     <strong>Copyright &copy; {{ date('Y') }} <a href="">IDCard</a>.</strong>
     All rights reserved.
     <div class="float-right d-none d-sm-inline-block">
       <b>Version</b> 1.0.0
     </div>
-  </footer> -->
+  </footer>
 </div>
-<!-- ./wrapper -->
 
-<!-- REQUIRED SCRIPTS -->
-<!-- jQuery -->
 <script src="{{asset('frontend/plugins/jquery/jquery.min.js')}}"></script>
-<!-- Bootstrap -->
 <script src="{{asset('frontend/plugins/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
-<!-- overlayScrollbars -->
 <script src="{{asset('frontend/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js')}}"></script>
-<!-- AdminLTE App -->
 <script src="{{asset('frontend/dist/js/adminlte.js')}}"></script>
-
-<!-- PAGE PLUGINS -->
-<!-- jQuery Mapael -->
 <script src="{{asset('frontend/plugins/jquery-mousewheel/jquery.mousewheel.js')}}"></script>
 <script src="{{asset('frontend/plugins/raphael/raphael.min.js')}}"></script>
 <script src="{{asset('frontend/plugins/jquery-mapael/jquery.mapael.min.js')}}"></script>
 <script src="{{asset('frontend/plugins/jquery-mapael/maps/usa_states.min.js')}}"></script>
-<!-- ChartJS -->
 <script src="{{asset('frontend/plugins/chart.js/Chart.min.js')}}"></script>
-
-<!-- AdminLTE for demo purposes -->
 <script src="{{asset('frontend/dist/js/demo.js')}}"></script>
-<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{{asset('frontend/dist/js/pages/dashboard2.js')}}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/dropzone.min.js"></script>
- <script>
-  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="{{asset('js/app.js')}}"></script>
+<script>
   $(document).ready(function () {
       $('#class_id').on('change', function () {
-
           let classId = $(this).val();
-
           $('#section_id').html('<option value="">Select Section</option>');
-
           if (classId) {
               $.ajax({
                   url: '/sections/' + classId,
@@ -346,80 +305,15 @@
               });
           }
       });
-
   });
 </script>
-<!-- <script>
-let stream = null;
-let video = null;
-
-$('#start-camera').click(async function () {
-
-    try {
-
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
-
-        stream = await navigator.mediaDevices.getUserMedia({
-            video: {
-                facingMode: $('#camera-facing-mode').val()
-            },
-            audio: false
-        });
-
-        video = document.createElement('video');
-        video.autoplay = true;
-        video.playsInline = true;
-        video.srcObject = stream;
-
-        $('#camera-feed').html(video);
-
-    } catch (e) {
-        alert('Unable to access camera.');
-        console.log(e);
-    }
-
-});
-
-$('#capture-photo').click(function () {
-
-    if (!video) {
-        alert('Start camera first.');
-        return;
-    }
-
-    const canvas = document.createElement('canvas');
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext('2d');
-
-    ctx.drawImage(video, 0, 0);
-
-    const image = canvas.toDataURL('image/png');
-
-    $('#photo_data').val(image);
-
-    $('#camera-preview').html(
-        '<img src="'+image+'" style="width:100%;height:100%;object-fit:cover;">'
-    );
-
-});
-</script> -->
-
 <script>
   let stream = null;
-
   async function startCamera() {
-
       if (stream) {
           stream.getTracks().forEach(track => track.stop());
       }
-
       const facingMode = document.getElementById('camera-facing-mode').value;
-
       try {
           stream = await navigator.mediaDevices.getUserMedia({
               video: {
@@ -427,7 +321,6 @@ $('#capture-photo').click(function () {
               },
               audio: false
           });
-
           const video = document.createElement('video');
           video.autoplay = true;
           video.playsInline = true;
@@ -451,34 +344,24 @@ $('#capture-photo').click(function () {
           console.log(err.name + "\n" + err.message);
       }
   }
-
   // Start button
   document.getElementById('start-camera').addEventListener('click', startCamera);
-
   // Change camera (Front/Back)
   document.getElementById('camera-facing-mode').addEventListener('change', startCamera);
-
   // Capture
   document.getElementById('capture-photo').addEventListener('click', function () {
-
       const video = document.querySelector('#camera-feed video');
-
       if (!video) {
           alert("Please start the camera first.");
           return;
       }
-
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth || 640;
       canvas.height = video.videoHeight || 480;
-
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0);
-
       const image = canvas.toDataURL("image/png");
-
       document.getElementById('photo_data').value = image;
-
       document.getElementById('camera-preview').innerHTML =
           '<img src="' + image + '" style="width:100%;height:100%;object-fit:cover;">';
   });
@@ -487,19 +370,15 @@ $('#capture-photo').click(function () {
     document.addEventListener('DOMContentLoaded', function () {
         var searchInput = document.getElementById('studentSearch');
         var tableRows = Array.from(document.querySelectorAll('#studentTable tbody tr'));
-
         if (!searchInput || tableRows.length === 0) {
             return;
         }
-
         searchInput.addEventListener('keyup', function () {
             var value = this.value.trim().toLowerCase();
-
             tableRows.forEach(function (row) {
                 var admissionNo = row.cells[0].textContent.toLowerCase();
                 var name = row.cells[1].textContent.toLowerCase();
                 var phone = row.cells[3].textContent.toLowerCase();
-
                 if (value.length < 3) {
                     row.style.display = '';
                 } else {
@@ -636,13 +515,48 @@ $('#capture-photo').click(function () {
           });
       }
   });
-  
 </script>
  <script>
     $(document).on('change', '.sample-radio', function () {
         $('#selected-sample-id').val($(this).val());
     });
 </script>
+<script>
+    @if(session('success'))
+        toastr.success("{{ session('success') }}", 'Success');
+    @endif
+</script>
+<script>
+    $(document).on('click', '.btn-danger', function (e) {
 
+        e.preventDefault();
+
+        let button = this;
+        let form = $(button).closest('form');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to undo this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+
+            if (result.isConfirmed) {
+
+                if (form.length) {
+                    form.submit();
+                } else if (button.tagName === 'A') {
+                    window.location.href = button.href;
+                }
+
+            }
+
+        });
+    });
+</script>
 </body>
 </html>

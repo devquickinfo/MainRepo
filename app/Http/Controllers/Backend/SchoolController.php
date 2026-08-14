@@ -46,17 +46,11 @@ class SchoolController extends Controller
     public function store(Request $request)
     {
 
-        // $request->validate([
-        //     'school_name'=>'required',
-        //     'school_code'=>'required|unique:schools',
-        //     'email'=>'nullable|email',
-        //     'school_logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048'
-        // ]);
         $validator = Validator::make($request->all(), [
             'school_name' => 'required',
             'school_code' => 'required|unique:schools',
             'email' => 'nullable|email',
-            'school_logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'school_logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
 
         if ($validator->fails()) {
@@ -65,7 +59,6 @@ class SchoolController extends Controller
                 ->withErrors($validator)
                 ->withInput();
         }
-
         $data = $request->only([
             'school_name',
             'school_code',
@@ -94,8 +87,11 @@ class SchoolController extends Controller
             ]);
         }
 
-         return redirect()
-        ->route('schools.show', ['school' => Auth::user()->school_id])
+        //  return redirect()
+        // ->route('schools.show', ['school' => Auth::user()->school_id])
+        // ->with('success', 'School Added Successfully');
+        return redirect()
+        ->route('schools.show', ['school' => $school->id])
         ->with('success', 'School Added Successfully');
 
     }
@@ -116,6 +112,9 @@ class SchoolController extends Controller
         }
 
         $classes = StudentClass::with('sections')
+             ->whereHas('students', function ($query) use ($school) {
+                $query->where('school_id', $school->id);
+             })
             ->withCount([
                 'students as students_count' => function ($query) use ($school) {
                     $query->where('school_id', $school->id);
@@ -132,6 +131,17 @@ class SchoolController extends Controller
 
     public function edit(School $school)
     {
+        $user = Auth::user();
+
+        if (
+            $user &&
+            $user->role === 'school' &&
+            $user->school_id &&
+            $user->school_id !== $school->id
+        ) {
+            abort(403);
+        }
+
         return view(
             'schools.edit',
             compact('school')
@@ -145,13 +155,13 @@ class SchoolController extends Controller
         if (! $user || $user->role !== 'school' || ! $user->school_id) {
             abort(403);
         }
-
+         
         $school = $user->school;
         $schoolUser = User::where('role', 'school')->where('school_id', $school->id)->first();
 
         return view('schools.profile', compact('school', 'schoolUser'));
     }
-
+   
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -262,7 +272,7 @@ class SchoolController extends Controller
         }
 
         $school->update($data);
-       dd($student->fresh()->photo);
+
         $schoolUser = User::where('role', 'school')
             ->where('school_id', $school->id)
             ->first();
@@ -313,5 +323,40 @@ class SchoolController extends Controller
             ]);
         }
         return redirect()->back()->with('success', 'Sample selected successfully.');
+    }
+    public function profileAdmin()
+    {
+        $user = Auth::user();
+        if (! $user || ($user->role !== 'school' && $user->role !== 'superadmin')) {
+            abort(403);
+        }
+        $admin=User::where('id',$user->id)->first();
+        return view('admin.profile', compact('admin'));
+    }
+    public function updateProfileAdmin(Request $request)
+    {
+        $user = Auth::user();
+        if (! $user || ($user->role !== 'school' && $user->role !== 'superadmin')) {
+            abort(403);
+        }
+        $admin=User::where('id',$user->id)->first();
+        $request->validate([
+            'email' => 'required|email|unique:users,email,' . $admin->id,
+            'password' => 'nullable|min:6|confirmed',
+            'profilepicture' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+        if ($request->hasFile('profilepicture')) {
+            if ($admin->profilepicture && Storage::disk('public')->exists($admin->profilepicture)) {
+                Storage::disk('public')->delete($admin->profilepicture);
+            }
+            $data['profilepicture'] = $request->file('profilepicture')->store('profiles', 'public');
+        }
+        $admin->update([
+            'email' => $request->email,
+            'password' => $request->filled('password') ? Hash::make($request->password) : $admin->password,
+            'profilepicture' => $data['profilepicture'] ?? $admin->profilepicture,
+        ]);
+        return redirect()->route('dashboard')
+         ->with('success', 'Profile updated successfully.');
     }
 }
