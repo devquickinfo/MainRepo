@@ -1,7 +1,185 @@
 @extends('frontend.layout.applayout')
 @section('title', 'Add Student')
 @section('content')
+<style>
 
+  .id-card-preview {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 4px 15px rgba(0,0,0,.25);
+  }
+
+  /* Background template */
+  .id-card-template {
+      display: block;
+      width: 100%;
+      height: auto;
+  }
+
+  /* =========================
+     SCHOOL LOGO
+  ========================= */
+
+  .card-school-logo {
+      position: absolute;
+      top: 4%;
+      left: 5%;
+      width: 12%;
+      aspect-ratio: 1 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 100%;
+      overflow: hidden;
+      z-index: 5;
+
+  }
+
+  .card-school-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+  }
+
+  .logo-placeholder {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: bold;
+      color: #333;
+  }
+
+  /* =========================
+     SCHOOL NAME & ADDRESS
+  ========================= */
+
+  .card-school-name {
+      position: absolute;
+      top: 3%;
+      left: 20%;
+      width: 75%;
+      text-align: left;
+      font-size: clamp(12px, 2vw, 22px);
+      font-weight: 800;
+      color: #173f7a;
+      text-transform: uppercase;
+      z-index: 5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
+
+  .card-school-address {
+      position: absolute;
+      top: 13%;
+      left: 20%;
+      width: 75%;
+      text-align: left;
+      font-size: clamp(6px, 1vw, 11px);
+      font-weight: 500;
+      color: #555;
+      z-index: 5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+  }
+
+  /* =========================
+     STUDENT PHOTO
+  ========================= */
+
+  .card-student-photo {
+      position: absolute;
+      top: 50%;
+      left: 5%;
+      width: 22%;
+      aspect-ratio: 3 / 4;
+      background: #eee;
+      border: 3px solid #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      z-index: 5;
+      box-shadow: 0 3px 10px rgba(0,0,0,.25);
+  }
+
+  .card-student-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+  }
+
+  .student-photo-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+      color: #777;
+  }
+
+  /* =========================
+     STUDENT DETAILS
+  ========================= */
+
+  .card-student-details {
+      position: absolute;
+      top: 25%;
+      left: 32%;
+      width: 63%;
+      z-index: 5;
+      color: #173f7a;
+      font-size: clamp(7px, 1.15vw, 14px);
+      font-weight: 600;
+  }
+
+  .card-detail-row {
+      display: flex;
+      width: 100%;
+      margin-bottom: 1.2%;
+      line-height: 1.25;
+  }
+
+  .detail-label {
+      width: 32%;
+      font-weight: 800;
+      flex-shrink: 0;
+  }
+
+  .detail-value {
+      width: 68%;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+  }
+
+  /* Mobile Responsive */
+  @media (max-width: 767px) {
+      .card-school-name {
+          font-size: 14px;
+      }
+      .card-school-address {
+          font-size: 7px;
+      }
+      .card-student-details {
+          font-size: 8px;
+      }
+  }
+
+</style>
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
   <!-- Content Header (Page header) -->
@@ -277,23 +455,145 @@
                         </div>
                       </div>
                       <div class="col-md-4">
-                        <div class="card card-info">
-                          <div class="card-header">
-                            <h3 class="card-title">Selected Card Sample</h3>
+                          <div class="card card-info">
+                              <div class="card-header">
+                                  <h3 class="card-title">Live ID Card Preview</h3>
+                              </div>
+
+                              <div class="card-body p-2">
+
+                                  @if($idcardsample)
+
+                                      <div class="id-card-preview">
+
+                                          {{-- ID CARD TEMPLATE --}}
+                                          <img
+                                              src="{{ asset('storage/' . $idcardsample->file_path) }}"
+                                              class="id-card-template"
+                                              alt="ID Card Template"
+                                          >
+
+                                          {{-- SCHOOL LOGO --}}
+                                          <div class="card-school-logo">
+                                              @if(isset($school) && $school->logo)
+                                                  <img
+                                                      src="{{ asset('storage/' . $school->logo) }}"
+                                                      alt="School Logo"
+                                                  >
+                                              @else
+                                                  <div class="logo-placeholder">
+                                                      LOGO
+                                                  </div>
+                                              @endif
+                                          </div>
+
+                                          {{-- SCHOOL NAME & ADDRESS --}}
+                                          <div class="card-school-name">
+                                              {{ $school->school_name ?? 'SCHOOL NAME' }}
+                                          </div>
+                                          <div class="card-school-address">
+                                              {{ $school->address ?? 'Address' }}
+                                          </div>
+
+                                          {{-- STUDENT PHOTO --}}
+                                          <div class="card-student-photo">
+                                              @if(isset($student) && $student->capturephoto)
+                                                  <img
+                                                      src="{{ asset('storage/' . $student->capturephoto) }}"
+                                                      id="cardStudentPhoto"
+                                                      alt="Student Photo"
+                                                  >
+                                              @elseif(isset($student) && $student->photo)
+                                                  <img
+                                                      src="{{ asset('storage/' . $student->photo) }}"
+                                                      id="cardStudentPhoto"
+                                                      alt="Student Photo"
+                                                  >
+                                              @else
+                                                  <div class="student-photo-placeholder">
+                                                      PHOTO
+                                                  </div>
+                                              @endif
+                                          </div>
+
+                                          {{-- STUDENT DETAILS --}}
+                                          <div class="card-student-details">
+
+                                              <div class="card-detail-row">
+                                                  <span class="detail-label">Name</span>
+                                                  <span class="detail-value" id="cardStudentName">
+                                                      {{ trim(($student->first_name ?? '') . ' ' . ($student->last_name ?? '')) ?: 'Student Name' }}
+                                                  </span>
+                                              </div>
+
+                                              <div class="card-detail-row">
+                                                  <span class="detail-label">Father</span>
+                                                  <span class="detail-value" id="cardFatherName">
+                                                      {{ $student->father_name ?? 'Father Name' }}
+                                                  </span>
+                                              </div>
+
+                                              <div class="card-detail-row">
+                                                  <span class="detail-label">Admission</span>
+                                                  <span class="detail-value" id="cardAdmissionNo">
+                                                      {{ $student->admission_no ?? 'Admission No' }}
+                                                  </span>
+                                              </div>
+
+                                              <div class="card-detail-row">
+                                                  <span class="detail-label">Class</span>
+                                                  <span class="detail-value" id="cardClass">
+                                                      {{ $student->studentClass->name ?? 'Class' }}
+                                                  </span>
+                                              </div>
+                                              <div class="card-detail-row">
+                                                  <span class="detail-label">Section</span>
+                                                  <span class="detail-value" id="cardSection">
+                                                      {{ $student->section->name ?? 'Section' }}
+                                                  </span>
+                                              </div>
+
+                                              <div class="card-detail-row">
+                                                  <span class="detail-label">DOB</span>
+                                                  <span class="detail-value" id="cardDob">
+                                                      @if(isset($student) && $student->date_of_birth)
+                                                          {{ $student->date_of_birth->format('d-m-Y') }}
+                                                      @else
+                                                          DOB
+                                                      @endif
+                                                  </span>
+                                              </div>
+
+                                             
+
+                                              <div class="card-detail-row">
+                                                  <span class="detail-label">Blood</span>
+                                                  <span class="detail-value" id="cardBloodGroup">
+                                                      {{ $student->blood_group ?? 'Blood Group' }}
+                                                  </span>
+                                              </div>
+
+                                              <div class="card-detail-row">
+                                                  <span class="detail-label">Phone</span>
+                                                  <span class="detail-value" id="cardPhone">
+                                                      {{ $student->phone ?? 'Phone' }}
+                                                  </span>
+                                              </div>
+
+                                          </div>
+
+                                      </div>
+
+                                  @else
+
+                                      <div class="alert alert-warning">
+                                          No ID card sample selected.
+                                      </div>
+
+                                  @endif
+
+                              </div>
                           </div>
-                          <div class="card-body">
-                            @if($idcardsample)
-                                <a href="{{ asset('storage/' . $idcardsample->file_path) }}"
-                                  data-toggle="modal"
-                                  data-target="#idCardImageModal">
-                                  <img src="{{ asset('storage/' . $idcardsample->file_path) }}"
-                                      alt="ID Card Sample"
-                                      class="img-thumbnail"
-                                      style="">
-                                </a>
-                            @endif
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>

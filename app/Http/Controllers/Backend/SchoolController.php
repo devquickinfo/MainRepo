@@ -162,6 +162,65 @@ class SchoolController extends Controller
         return view('schools.profile', compact('school', 'schoolUser'));
     }
    
+    // public function updateProfile(Request $request)
+    // {
+    //     $user = Auth::user();
+
+    //     if (! $user || $user->role !== 'school' || ! $user->school_id) {
+    //         abort(403);
+    //     }
+
+    //     $school = $user->school;
+    //     $schoolUser = User::where('role', 'school')->where('school_id', $school->id)->first();
+
+    //     $request->validate([
+    //         'school_name' => 'required',
+    //         'school_code' => 'required|unique:schools,school_code,' . $school->id,
+    //         'email' => 'required|email',
+    //         'principal_name' => 'required|string',
+    //         'phone' => 'required|string',
+    //         'address' => 'required|string',
+    //         'username' => 'required|string|unique:users,email,' . ($schoolUser?->id ?? 'NULL'),
+    //         'password' => 'nullable|min:6|confirmed',
+    //         'school_logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+    //     ]);
+    //    if ($request->hasFile('school_logo')) {
+
+    //         if ($school->logo && Storage::disk('public')->exists($school->logo)) {
+    //             Storage::disk('public')->delete($school->logo);
+    //         }
+
+    //         $data['logo'] = $request->file('school_logo')->store('schools', 'public');
+    //     }
+
+    //     $school->update([
+    //         'school_name' => $request->school_name,
+    //         'school_code' => $request->school_code,
+    //         'email' => $request->email,
+    //         'principal_name' => $request->principal_name,
+    //         'phone' => $request->phone,
+    //         'address' => $request->address,
+    //         'status' => $school->status,
+    //         'logo' => $data['logo'] ?? $school->logo,
+    //     ]);
+
+    //     if ($schoolUser) {
+    //         $schoolUser->update([
+    //             'name' =>  $school->school_name,
+    //             'email' => $request->username,
+    //         ]);
+
+    //         if ($request->filled('password')) {
+    //             $schoolUser->update([
+    //                 'password' => Hash::make($request->password),
+    //             ]);
+    //         }
+    //     }
+
+    //      return redirect()
+    //     ->route('schools.show', ['school' => Auth::user()->school_id])
+    //     ->with('success', 'School Updated Successfully');
+    // }
     public function updateProfile(Request $request)
     {
         $user = Auth::user();
@@ -171,7 +230,10 @@ class SchoolController extends Controller
         }
 
         $school = $user->school;
-        $schoolUser = User::where('role', 'school')->where('school_id', $school->id)->first();
+
+        $schoolUser = User::where('role', 'school')
+            ->where('school_id', $school->id)
+            ->first();
 
         $request->validate([
             'school_name' => 'required',
@@ -180,19 +242,39 @@ class SchoolController extends Controller
             'principal_name' => 'required|string',
             'phone' => 'required|string',
             'address' => 'required|string',
-            'username' => 'required|string|unique:users,email,' . ($schoolUser?->id ?? 'NULL'),
-            'password' => 'nullable|min:6|confirmed',
-            'school_logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
-        ]);
-       if ($request->hasFile('school_logo')) {
 
-            if ($school->logo && Storage::disk('public')->exists($school->logo)) {
+            'username' => 'required|string|unique:users,email,' . ($schoolUser?->id ?? 'NULL'),
+
+            'password' => 'nullable|min:6|confirmed',
+
+            'school_logo' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+
+            'principal_signature' => 'nullable|image|mimes:jpg,jpeg,png,webp,avif|max:5120',
+        ]);
+        $data = [];
+        if ($request->hasFile('school_logo')) {
+            if (
+                $school->logo &&
+                Storage::disk('public')->exists($school->logo)
+            ) {
                 Storage::disk('public')->delete($school->logo);
             }
 
-            $data['logo'] = $request->file('school_logo')->store('schools', 'public');
+            $data['logo'] = $request->file('school_logo')
+                ->store('schools', 'public');
         }
+        if ($request->hasFile('principal_signature')) {
 
+            if (
+                $school->principal_signature &&
+                Storage::disk('public')->exists($school->principal_signature)
+            ) {
+                Storage::disk('public')->delete($school->principal_signature);
+            }
+
+            $data['principal_signature'] = $request->file('principal_signature')
+                ->store('schools/signatures', 'public');
+        }
         $school->update([
             'school_name' => $request->school_name,
             'school_code' => $request->school_code,
@@ -201,12 +283,23 @@ class SchoolController extends Controller
             'phone' => $request->phone,
             'address' => $request->address,
             'status' => $school->status,
+
             'logo' => $data['logo'] ?? $school->logo,
+
+            'principal_signature' =>
+                $data['principal_signature'] ?? $school->principal_signature,
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Update School User
+        |--------------------------------------------------------------------------
+        */
+
         if ($schoolUser) {
+
             $schoolUser->update([
-                'name' =>  $school->school_name,
+                'name' => $school->school_name,
                 'email' => $request->username,
             ]);
 
@@ -217,9 +310,11 @@ class SchoolController extends Controller
             }
         }
 
-         return redirect()
-        ->route('schools.show', ['school' => Auth::user()->school_id])
-        ->with('success', 'School Updated Successfully');
+        return redirect()
+            ->route('schools.show', [
+                'school' => Auth::user()->school_id
+            ])
+            ->with('success', 'School Updated Successfully');
     }
 
 

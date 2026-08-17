@@ -10,6 +10,8 @@ use App\Http\Controllers\Backend\StudentController;
 use App\Http\Controllers\Backend\SchoolController;
 use App\Http\Controllers\Backend\StudentImportController;
 use App\Http\Controllers\UploadSampleController;
+use App\Http\Controllers\IdCardTemplateController;
+
 
 
 Route::get('/', function () {
@@ -70,5 +72,52 @@ Route::middleware('auth')->group(function () {
     ->name('student.deleted');
     route::post('/student/{student}/restore', [StudentListController::class, 'restoreStudent'])
     ->name('student.restore');
+
+
+
+
+    Route::get('/id-card-templates', 
+        [IdCardTemplateController::class, 'index']
+    )->name('id-card-templates.index');
+
+    Route::get('/id-card-templates/create', 
+        [IdCardTemplateController::class, 'create']
+    )->name('id-card-templates.create');
+
+    Route::post('/id-card-templates', 
+        [IdCardTemplateController::class, 'store']
+    )->name('id-card-templates.store');
+
+    Route::get('/id-card-templates/{template}/designer', 
+        [IdCardTemplateController::class, 'designer']
+    )->name('id-card-templates.designer');
+
+    Route::post('/id-card-templates/{template}/fields', 
+        [IdCardTemplateController::class, 'saveFields']
+    )->name('id-card-templates.save-fields');
+
+    Route::get('/id-card-templates/{template}/edit', 
+        [IdCardTemplateController::class, 'edit']
+    )->name('id-card-templates.edit');
+
+    Route::put('/id-card-templates/{template}', 
+        [IdCardTemplateController::class, 'update']
+    )->name('id-card-templates.update');
+
+    Route::delete('/id-card-templates/{template}', 
+        [IdCardTemplateController::class, 'destroy']
+    )->name('id-card-templates.destroy');
+
+    Route::post('/id-card-templates/{template}/activate', 
+        [IdCardTemplateController::class, 'activate']
+    )->name('id-card-templates.activate');
+
+    Route::get('/id-card-templates/{template}/students', 
+        [IdCardTemplateController::class, 'selectStudents']
+    )->name('id-card-templates.students');
+
+    Route::post('/id-card-templates/{template}/generate', 
+        [IdCardTemplateController::class, 'generate']
+    )->name('id-card-templates.generate');
 
 });

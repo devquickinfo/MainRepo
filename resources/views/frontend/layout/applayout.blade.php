@@ -22,6 +22,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
   
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
   <style>
      .content-wrapper {
         margin-left: 0 !important;
@@ -108,6 +112,11 @@
                       Upload Sample
                     @endif
               </a>
+          </li>
+           <li class="nav-item">
+            <a href="{{ route('id-card-templates.index') }}" class="nav-link">
+                ID Card Templates
+            </a>
           </li>
     </ul>
    
@@ -531,8 +540,10 @@
 
         e.preventDefault();
 
+
         let button = this;
         let form = $(button).closest('form');
+        let buttonText = $(button).text().trim();
 
         Swal.fire({
             title: 'Are you sure?',
@@ -541,7 +552,7 @@
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it!',
+            confirmButtonText: `Yes, ${buttonText} it!`,
             cancelButtonText: 'Cancel'
         }).then((result) => {
 
@@ -558,5 +569,226 @@
         });
     });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const admissionNo  = document.querySelector('[name="admission_no"]');
+    const firstName    = document.querySelector('[name="first_name"]');
+    const lastName     = document.querySelector('[name="last_name"]');
+    const fatherName   = document.querySelector('[name="father_name"]');
+    const section      = document.querySelector('[name="section_id"]');
+    const dob          = document.querySelector('[name="date_of_birth"]');
+    const classSelect  = document.querySelector('[name="class_id"]');
+    const bloodGroup   = document.querySelector('[name="blood_group"]');
+    const phone        = document.querySelector('[name="phone"]');
+
+
+    function setText(id, value, defaultText) {
+
+        const element = document.getElementById(id);
+
+        if (element) {
+            element.textContent =
+                value && value.trim()
+                    ? value
+                    : defaultText;
+        }
+    }
+
+
+    function updateCard() {
+
+        // Student Name
+        let first = firstName ? firstName.value.trim() : '';
+        let last  = lastName ? lastName.value.trim() : '';
+
+        let fullName = `${first} ${last}`.trim();
+
+        setText(
+            'cardStudentName',
+            fullName,
+            'Student Name'
+        );
+
+
+        // Father Name
+        setText(
+            'cardFatherName',
+            fatherName ? fatherName.value : '',
+            'Father Name'
+        );
+
+
+        // Admission Number
+        setText(
+            'cardAdmissionNo',
+            admissionNo ? admissionNo.value : '',
+            'Admission No'
+        );
+
+
+        // Section
+        if (section) {
+
+            const selectedOption =
+                section.options[section.selectedIndex];
+
+            if (selectedOption && selectedOption.value) {
+
+                setText(
+                    'cardSection',
+                    selectedOption.text,
+                    'Section'
+                );
+
+            } else {
+
+                setText(
+                    'cardSection',
+                    '',
+                    'Section'
+                );
+            }
+        }
+
+
+        // Blood Group
+        setText(
+            'cardBloodGroup',
+            bloodGroup ? bloodGroup.value : '',
+            'Blood Group'
+        );
+
+
+        // Phone
+        setText(
+            'cardPhone',
+            phone ? phone.value : '',
+            'Phone'
+        );
+
+
+        // Class
+        if (classSelect) {
+
+            const selectedOption =
+                classSelect.options[classSelect.selectedIndex];
+
+            if (selectedOption && selectedOption.value) {
+
+                setText(
+                    'cardClass',
+                    selectedOption.text,
+                    'Class'
+                );
+
+            } else {
+
+                setText(
+                    'cardClass',
+                    '',
+                    'Class'
+                );
+            }
+        }
+
+
+        // Date of Birth
+        if (dob && dob.value) {
+
+            const parts = dob.value.split('-');
+
+            if (parts.length === 3) {
+
+                const formattedDob =
+                    `${parts[2]}-${parts[1]}-${parts[0]}`;
+
+                setText(
+                    'cardDob',
+                    formattedDob,
+                    'DOB'
+                );
+            }
+
+        } else {
+
+            setText(
+                'cardDob',
+                '',
+                'DOB'
+            );
+        }
+    }
+
+
+    // Listen for changes
+
+    if (admissionNo) {
+        admissionNo.addEventListener('input', updateCard);
+    }
+
+    if (firstName) {
+        firstName.addEventListener('input', updateCard);
+    }
+
+    if (lastName) {
+        lastName.addEventListener('input', updateCard);
+    }
+
+    if (fatherName) {
+        fatherName.addEventListener('input', updateCard);
+    }
+
+    if (section) {
+        section.addEventListener('change', updateCard);
+    }
+
+    if (dob) {
+        dob.addEventListener('change', updateCard);
+    }
+
+    if (classSelect) {
+        classSelect.addEventListener('change', updateCard);
+    }
+
+    if (bloodGroup) {
+        bloodGroup.addEventListener('input', updateCard);
+    }
+
+    if (phone) {
+        phone.addEventListener('input', updateCard);
+    }
+
+
+    // Initial card render
+    updateCard();
+
+});
+</script>
+<script>
+ document.getElementById('capture-photo').addEventListener('click', function () {
+
+    // Your existing capture/canvas code here
+
+    const imageData = canvas.toDataURL('image/jpeg');
+
+    // Store captured photo
+    document.getElementById('photo_data').value = imageData;
+
+    // Show in captured photo preview
+    document.getElementById('camera-preview').innerHTML = `
+        <img
+            src="${imageData}"
+            style="width:100%;height:100%;object-fit:cover;"
+        >
+    `;
+
+    // Show immediately on ID card
+    updateCardPhoto(imageData);
+});
+</script>
+
+@yield('scripts')
+
 </body>
 </html>

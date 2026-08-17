@@ -18,7 +18,8 @@ class School extends Model
         'state',
         'pincode',
         'logo',
-        'status'
+        'status',
+        'principal_signature',
 
     ];
 }

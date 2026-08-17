@@ -38,16 +38,20 @@ class StudentController extends Controller
     public function create()
     {
         $classes = StudentClass::all();
-        $sections = Section::all();
+        $sections = Section::selectRaw('MIN(id) as id, name')
+            ->groupBy('name')
+            ->orderBy('id', 'ASC')
+            ->get();
         $students = Student::with(['studentClass', 'section'])->latest()->paginate(10);
         $school_id = Auth::user()->school_id;
+        $school = School::where('id', $school_id)->first();
         $selectedSample = SelectedSample::where('school_id', $school_id)->first();
         $idcardsample = null;
         if ($selectedSample) {
             $idcardsample = UploadSample::where('id', $selectedSample->sample_id)->first();
         }
 
-        return view('frontend.addstudent', compact('students', 'classes', 'sections', 'idcardsample'));
+        return view('frontend.addstudent', compact('students', 'classes', 'sections', 'idcardsample','school'));
     }
 
     /**
@@ -179,19 +183,21 @@ class StudentController extends Controller
             ->get();
         $students = Student::with(['studentClass', 'section'])->latest()->paginate(10);
         $school_id = Auth::user()->school_id;
+        $school = School::where('id', $school_id)->first();
         $idcardsample = null;
         $selectedSample = SelectedSample::where('school_id', $school_id)->first();
         if ($selectedSample) {
             $idcardsample = UploadSample::where('id', $selectedSample->sample_id)->first();
         }
-
+       
 
         return view('frontend.addstudent', compact(
             'student',
             'students',
             'classes',
             'sections',
-            'idcardsample'
+            'idcardsample',
+            'school'
         ));
     }
 

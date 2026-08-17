@@ -132,7 +132,6 @@
                                     <td style="white-space: nowrap;">
                                         <form action="{{ route('student.restore', $student->id) }}" method="POST" class="d-inline">
                                             @csrf
-                                            @method('PATCH')
                                             <button type="submit" class="btn btn-sm btn-danger" onclick="">Restore</button>
                                         </form>
                                     </td>
