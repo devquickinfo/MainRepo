@@ -28,7 +28,7 @@ class LoginController extends Controller
                 ->withInput();
         }
         if (Auth::attempt([
-            'email' => $request->email,
+            'username' => $request->email,
             'password' => $request->password,
         ], $request->remember)) {
             $user = Auth::user();

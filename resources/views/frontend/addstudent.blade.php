@@ -178,6 +178,73 @@
           font-size: 8px;
       }
   }
+  /*ID card Edit Styles*/
+   .preview-field {
+    position: absolute;
+    font-size: 12px;
+    font-weight: 600;
+    color: #111;
+    }
+
+    #preview-name {
+        top: 80px;
+        left: 80px;
+    }
+
+    #preview-admission {
+        top: 100px;
+        left: 80px;
+        font-size: 10px;
+    }
+
+    #preview-class {
+        top: 115px;
+        left: 80px;
+        font-size: 10px;
+    }
+
+    #preview-address {
+        bottom: 15px;
+        left: 20px;
+        font-size: 10px;
+    }
+    /* Make modal body scrollable */
+    #editSampleModal .modal-body {
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    /* Make the preview column stick while the right column scrolls */
+    #editSampleModal .col-md-6:first-child {
+        position: sticky;
+        top: 0;
+        align-self: flex-start;
+    }
+
+    /* Bootstrap's .row is display:flex by default, but just in case */
+    #editSampleModal .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    #id-card-preview {
+    transition: width 0.2s ease, height 0.2s ease;
+    padding: 0;
+    box-sizing: border-box;
+    }
+    .preview-field {
+        position: absolute;
+        font-size: 12px;
+        font-weight: 600;
+        color: #111;
+        white-space: nowrap;
+    }
+    #preview-name     { top: 80px;  left: 80px; }
+    #preview-admission{ top: 100px; left: 80px; font-size: 10px; }
+    #preview-class    { top: 115px; left: 80px; font-size: 10px; }
+    #preview-address  { bottom: 15px; left: 20px; font-size: 10px; }
+    #preview-photo    { top: 60px; left: 15px; width: 80px; height: 80px; }
+    #preview-logo     { top: 10px; left: 10px; width: 40px; height: 40px; }
+    #preview-signature{ bottom: 10px; right: 15px; width: 60px; height: 30px; }
 
 </style>
 <!-- Content Wrapper. Contains page content -->
@@ -392,8 +459,8 @@
                             <h3 class="card-title">Captured Photo</h3>
                           </div>
                           <div class="card-body text-center">
-                            <div id="camera-preview" style="width:250px;
-                                                height:325px;
+                            <div id="camera-preview" style="width:200px;
+                                                height:300px;
                                                 margin:auto;
                                                 border:1px solid #ccc;
                                                 border-radius:8px;
@@ -403,8 +470,8 @@
                                                 overflow:hidden;
                                                 background:#fff;">
 
-                              @if(isset($student) && $student->capturephoto)
-                              <img src="{{ asset('storage/' . $student->capturephoto) }}"
+                              @if(isset($student) && ($student->capturephoto || $student->photo))
+                              <img src="{{ asset('storage/' . ($student->capturephoto ?? $student->photo)) }}"
                                 style="width:100%;height:100%;object-fit:cover;">
                               @else
                               No Capture
@@ -439,13 +506,13 @@
                               </select>
                             </div>
                             <div class="form-group mt-4">
-                              <button type="button" id="start-camera" class="btn btn-primary btn-block">
+                              <button type="button" id="start-camera" class="btn btn-primary btn-sm">
                                 <i class="fas fa-video"></i>
                                 Start Camera
                               </button>
                             </div>
                             <div class="form-group">
-                              <button type="button" id="capture-photo" class="btn btn-success btn-block">
+                              <button type="button" id="capture-photo" class="btn btn-sm btn-success">
                                 <i class="fas fa-camera"></i>
                                 Capture Photo
                               </button>
@@ -456,25 +523,28 @@
                       </div>
                       <div class="col-md-4">
                           <div class="card card-info">
-                              <div class="card-header">
-                                  <h3 class="card-title">Live ID Card Preview</h3>
+                              <div class="card-header d-flex align-items-center">
+                                  <h3 class="card-title mb-0">Live ID Card Preview</h3>
+                                  <!-- <button type="button"
+                                          class="btn btn-sm btn-warning ml-auto"
+                                          data-toggle="modal"
+                                          data-target="#editSampleModal">
+                                      <i class="fas fa-edit"></i> Edit
+                                  </button> -->
+                                  <a href="{{ route('idcard.editor') }}"
+                                     class="btn btn-sm btn-warning ml-auto" target="_blank">
+                                      <i class="fas fa-edit"></i> Edit
+                                  </a>
                               </div>
-
                               <div class="card-body p-2">
-
                                   @if($idcardsample)
-
                                       <div class="id-card-preview">
-
-                                          {{-- ID CARD TEMPLATE --}}
                                           <img
                                               src="{{ asset('storage/' . $idcardsample->file_path) }}"
                                               class="id-card-template"
                                               alt="ID Card Template"
                                           >
-
-                                          {{-- SCHOOL LOGO --}}
-                                          <div class="card-school-logo">
+                                         {{------ <div class="card-school-logo">
                                               @if(isset($school) && $school->logo)
                                                   <img
                                                       src="{{ asset('storage/' . $school->logo) }}"
@@ -486,16 +556,12 @@
                                                   </div>
                                               @endif
                                           </div>
-
-                                          {{-- SCHOOL NAME & ADDRESS --}}
                                           <div class="card-school-name">
                                               {{ $school->school_name ?? 'SCHOOL NAME' }}
                                           </div>
                                           <div class="card-school-address">
                                               {{ $school->address ?? 'Address' }}
                                           </div>
-
-                                          {{-- STUDENT PHOTO --}}
                                           <div class="card-student-photo">
                                               @if(isset($student) && $student->capturephoto)
                                                   <img
@@ -515,10 +581,7 @@
                                                   </div>
                                               @endif
                                           </div>
-
-                                          {{-- STUDENT DETAILS --}}
                                           <div class="card-student-details">
-
                                               <div class="card-detail-row">
                                                   <span class="detail-label">Name</span>
                                                   <span class="detail-value" id="cardStudentName">
@@ -580,18 +643,13 @@
                                                   </span>
                                               </div>
 
-                                          </div>
-
+                                          </div>-----}}
                                       </div>
-
                                   @else
-
                                       <div class="alert alert-warning">
                                           No ID card sample selected.
                                       </div>
-
                                   @endif
-
                               </div>
                           </div>
                       </div>
@@ -629,6 +687,371 @@
     </div>
   </div>
 </div>
+@if($idcardsample)
+<div class="modal fade" id="editSampleModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl" role="document" style="max-width: 1200px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Edit ID Card
+                </h5>
+                <button type="button"
+                        class="close"
+                        data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card card-info">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    Preview ID Card
+                                </h3>
+                            </div>
+                            <div class="card-body text-center">
+                                <div id="id-card-preview" style="position: relative; display: inline-block; width: 380px; overflow: hidden; background: #fff;">
+                                    <img src="{{ asset('storage/' . $idcardsample->file_path) }}"
+                                        id="preview-background"
+                                        class="img-fluid"
+                                        style="width: 100%; height: auto; display: block;"
+                                        alt="ID Card">
+                                    <div class="preview-field" id="preview-name">Student Name</div>
+                                    <div class="preview-field" id="preview-admission">Admission No: 83838</div>
+                                    <div class="preview-field" id="preview-class">Class: Class 1 (A)</div>
+                                    <div class="preview-field" id="preview-address">Address</div>
+                                    <img id="preview-photo" src="{{ asset('images/default-photo.png') }}" style="display:none; position:absolute; object-fit:cover;">
+                                    <img id="preview-logo" src="" style="display:none; position:absolute; object-fit:contain;">
+                                    <img id="preview-signature" src="" style="display:none; position:absolute; object-fit:contain;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    ID Card Settings
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>ID CARD TITLE <span class="text-danger">*</span></label>
+                                    <input type="text"
+                                           name="title"
+                                           class="form-control"
+                                           value="{{ $idcardsample->title ?? '' }}"
+                                           id="card-title">
+                                </div>
+                                <div class="form-group">
+                                    <label>LAYOUT</label>
+                                    <select name="layout"
+                                            id="card-layout"
+                                            class="form-control">
+
+                                        <option value="horizontal">
+                                            Horizontal
+                                        </option>
+
+                                        <option value="vertical">
+                                            Vertical
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>BACKGROUND IMAGE</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                               class="form-control"
+                                               id="background-image-name"
+                                               placeholder="Background Image"
+                                               readonly>
+                                        <div class="input-group-append">
+                                            <label class="btn btn-primary mb-0">
+                                                BROWSE
+                                                <input type="file"
+                                                       id="background-image"
+                                                       accept="image/*"
+                                                       hidden>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>APPLICABLE USER</label>
+                                    <select name="applicable_user"
+                                            class="form-control">
+                                        <option value="student">
+                                            Student
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>
+                                                PAGE LAYOUT WIDTH
+                                                <small>(DEFAULT 57 MM)</small>
+                                            </label>
+                                            <input type="number"
+                                                   name="page_width"
+                                                   class="form-control"
+                                                   value="57"
+                                                   step="0.1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>
+                                                PAGE LAYOUT HEIGHT
+                                                <small>(DEFAULT 89 MM)</small>
+                                            </label>
+
+                                            <input type="number"
+                                                   name="page_height"
+                                                   class="form-control"
+                                                   value="89"
+                                                   step="0.1">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>PROFILE IMAGE</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                               class="form-control"
+                                               id="profile-image-name"
+                                               placeholder="Profile Image"
+                                               readonly>
+                                        <div class="input-group-append">
+                                            <label class="btn btn-primary mb-0">
+                                                BROWSE
+                                                <input type="file"
+                                                       id="profile-image"
+                                                       accept="image/*"
+                                                       hidden>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>USER PHOTO STYLE</label>
+                                    <select name="photo_style"
+                                            class="form-control"
+                                            id="photo-style">
+                                        <option value="square">
+                                            Square
+                                        </option>
+                                        <option value="circle">
+                                            Circle
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>
+                                                USER PHOTO SIZE WIDTH
+                                                <small>(DEFAULT 21 MM)</small>
+                                            </label>
+                                            <input type="number"
+                                                   name="photo_width"
+                                                   class="form-control"
+                                                   value="21"
+                                                   step="0.1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>
+                                                USER PHOTO SIZE HEIGHT
+                                                <small>(DEFAULT 21 MM)</small>
+                                            </label>
+
+                                            <input type="number"
+                                                   name="photo_height"
+                                                   class="form-control"
+                                                   value="21"
+                                                   step="0.1">
+                                        </div>
+                                    </div>
+                                </div>
+                                <label class="mt-2">
+                                    Layout Spacing
+                                </label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>
+                                                TOP SPACE
+                                                <small>(DEFAULT 2.5 MM)</small>
+                                            </label>
+
+                                            <input type="number"
+                                                   name="top_space"
+                                                   class="form-control"
+                                                   value="2.5"
+                                                   step="0.1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>
+                                                BOTTOM SPACE
+                                                <small>(DEFAULT 2.5 MM)</small>
+                                            </label>
+
+                                            <input type="number"
+                                                   name="bottom_space"
+                                                   class="form-control"
+                                                   value="2.5"
+                                                   step="0.1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>
+                                                LEFT SPACE
+                                                <small>(DEFAULT 3 MM)</small>
+                                            </label>
+
+                                            <input type="number"
+                                                   name="left_space"
+                                                   class="form-control"
+                                                   value="3"
+                                                   step="0.1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>
+                                                RIGHT SPACE
+                                                <small>(DEFAULT 3 MM)</small>
+                                            </label>
+
+                                            <input type="number"
+                                                   name="right_space"
+                                                   class="form-control"
+                                                   value="3"
+                                                   step="0.1">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>LOGO</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                               class="form-control"
+                                               id="logo-name"
+                                               placeholder="Logo"
+                                               readonly>
+                                        <div class="input-group-append">
+                                            <label class="btn btn-primary mb-0">
+                                                BROWSE
+                                                <input type="file"
+                                                       id="logo-image"
+                                                       accept="image/*"
+                                                       hidden>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        SIGNATURE
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                               class="form-control"
+                                               id="signature-name"
+                                               placeholder="Signature"
+                                               readonly>
+                                        <div class="input-group-append">
+                                            <label class="btn btn-primary mb-0">
+                                                BROWSE
+
+                                                <input type="file"
+                                                       id="signature-image"
+                                                       accept="image/*"
+                                                       hidden>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="id-card-fields">
+                                    @php
+                                        $fields = [
+                                            'admission_no' => 'ADMISSION NO',
+                                            'name'         => 'NAME',
+                                            'class'        => 'CLASS',
+                                            'address'      => 'ADDRESS',
+                                            'photo'        => 'PHOTO',
+                                            'signature'    => 'SIGNATURE',
+                                        ];
+                                    @endphp
+                                    @foreach($fields as $key => $label)
+                                        <div class="row align-items-center mb-3">
+                                            <div class="col-6">
+                                                <label class="mb-0">
+                                                    {{ $label }}
+                                                </label>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="custom-control custom-radio">
+                                                    <input type="radio"
+                                                           class="custom-control-input"
+                                                           id="{{ $key }}_yes"
+                                                           name="{{ $key }}"
+                                                           value="1"
+                                                           checked>
+
+                                                    <label class="custom-control-label"
+                                                           for="{{ $key }}_yes">
+                                                        Yes
+                                                    </label>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="custom-control custom-radio">
+                                                    <input type="radio"
+                                                           class="custom-control-input"
+                                                           id="{{ $key }}_no"
+                                                           name="{{ $key }}"
+                                                           value="0">
+                                                    <label class="custom-control-label"
+                                                           for="{{ $key }}_no">
+                                                        No
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        data-dismiss="modal">
+                    Close
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        id="save-id-card">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 @section('scripts')
 <script>
@@ -654,5 +1077,139 @@
       classSelect.addEventListener('change', filterSections);
     }
   });
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const preview = document.getElementById('id-card-preview');
+    const bg = document.getElementById('preview-background');
+
+    // ---- px-per-mm scale, recalculated whenever page width changes ----
+    const DISPLAY_WIDTH = 380; // fixed preview width in px
+    function getScale() {
+        const widthMm = parseFloat(document.querySelector('[name="page_width"]').value) || 57;
+        return DISPLAY_WIDTH / widthMm;
+    }
+
+    function applyPageSize() {
+        const widthMm  = parseFloat(document.querySelector('[name="page_width"]').value) || 57;
+        const heightMm = parseFloat(document.querySelector('[name="page_height"]').value) || 89;
+        const scale = getScale();
+        preview.style.width  = DISPLAY_WIDTH + 'px';
+        preview.style.height = (heightMm * scale) + 'px';
+        applySpacing();
+        applyPhotoSize();
+    }
+
+    function applySpacing() {
+        const scale = getScale();
+        const top    = parseFloat(document.querySelector('[name="top_space"]').value) || 0;
+        const bottom = parseFloat(document.querySelector('[name="bottom_space"]').value) || 0;
+        const left   = parseFloat(document.querySelector('[name="left_space"]').value) || 0;
+        const right  = parseFloat(document.querySelector('[name="right_space"]').value) || 0;
+
+        preview.style.padding =
+            (top * scale) + 'px ' +
+            (right * scale) + 'px ' +
+            (bottom * scale) + 'px ' +
+            (left * scale) + 'px';
+    }
+
+    function applyPhotoSize() {
+        const scale = getScale();
+        const w = parseFloat(document.querySelector('[name="photo_width"]').value) || 21;
+        const h = parseFloat(document.querySelector('[name="photo_height"]').value) || 21;
+        const photo = document.getElementById('preview-photo');
+        photo.style.width  = (w * scale) + 'px';
+        photo.style.height = (h * scale) + 'px';
+    }
+
+    // ---- LAYOUT (horizontal / vertical) ----
+    document.getElementById('card-layout').addEventListener('change', function () {
+        const widthInput  = document.querySelector('[name="page_width"]');
+        const heightInput = document.querySelector('[name="page_height"]');
+
+        // swap width/height values when orientation changes
+        const w = widthInput.value;
+        const h = heightInput.value;
+        widthInput.value  = h;
+        heightInput.value = w;
+
+        applyPageSize();
+    });
+
+    // ---- PAGE SIZE / SPACING / PHOTO SIZE live inputs ----
+    ['page_width', 'page_height'].forEach(name => {
+        document.querySelector(`[name="${name}"]`).addEventListener('input', applyPageSize);
+    });
+
+    ['top_space', 'bottom_space', 'left_space', 'right_space'].forEach(name => {
+        document.querySelector(`[name="${name}"]`).addEventListener('input', applySpacing);
+    });
+
+    ['photo_width', 'photo_height'].forEach(name => {
+        document.querySelector(`[name="${name}"]`).addEventListener('input', applyPhotoSize);
+    });
+
+    // ---- PHOTO STYLE (square / circle) ----
+    document.getElementById('photo-style').addEventListener('change', function () {
+        const photo = document.getElementById('preview-photo');
+        photo.style.borderRadius = this.value === 'circle' ? '50%' : '0';
+    });
+
+    // ---- IMAGE UPLOADS (background, profile, logo, signature) ----
+    function bindImageUpload(inputId, nameFieldId, targetImgId, showOnUpload = true) {
+        document.getElementById(inputId).addEventListener('change', function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            document.getElementById(nameFieldId).value = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.getElementById(targetImgId);
+                img.src = e.target.result;
+                if (showOnUpload) img.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    bindImageUpload('background-image', 'background-image-name', 'preview-background');
+    bindImageUpload('profile-image',    'profile-image-name',    'preview-photo');
+    bindImageUpload('logo-image',       'logo-name',              'preview-logo');
+    bindImageUpload('signature-image',  'signature-name',         'preview-signature');
+
+    // ---- YES / NO FIELD TOGGLES ----
+    const fieldMap = {
+        admission_no: 'preview-admission',
+        name:         'preview-name',
+        class:        'preview-class',
+        address:      'preview-address',
+        photo:        'preview-photo',
+        signature:    'preview-signature',
+    };
+
+    Object.keys(fieldMap).forEach(function (key) {
+        document.querySelectorAll(`input[name="${key}"]`).forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                const targetEl = document.getElementById(fieldMap[key]);
+                const isYes = this.value === '1' && this.checked;
+
+                if (!targetEl) return;
+
+                if (key === 'photo' || key === 'signature') {
+                    // only show if it's set to yes AND actually has an image loaded
+                    targetEl.style.display = (isYes && targetEl.src) ? 'block' : 'none';
+                } else {
+                    targetEl.style.display = isYes ? 'block' : 'none';
+                }
+            });
+        });
+    });
+
+    // ---- INIT on modal open ----
+    applyPageSize();
+});
 </script>
 @endsection

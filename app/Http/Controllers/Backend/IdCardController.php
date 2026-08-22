@@ -6,6 +6,8 @@ use App\Models\Student;
 use App\Models\StudentClass;
 use App\Models\Section;
 use App\Models\School;
+use App\Models\SelectedSample;
+use App\Models\UploadSample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -14,7 +16,7 @@ class IdCardController extends Controller
 {
     public function index(Request $request)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = Auth::user()->school_id ?? session('viewing_school');
         $classes = StudentClass::
             orderBy('id', 'ASC')
             ->get();
@@ -48,40 +50,7 @@ class IdCardController extends Controller
         return view('schools.partials.student_rows', compact('students'))->render();
     }
 
-    // public function generate(Request $request)
-    // {
-    //     $schoolId = Auth::user()->school_id;
-
-    //     $studentIds = $request->input('student_ids', []);
-
-    //     if (empty($studentIds)) {
-    //         return redirect()->back()->with('error', 'Please select at least one student.');
-    //     }
-
-    //     $students = Student::with(['studentClass', 'section'])
-    //         ->where('school_id', $schoolId)
-    //         ->whereIn('id', $studentIds)
-    //         ->orderBy('first_name')
-    //         ->get();
-
-    //     $school = School::find($schoolId);
-
-    //     $template = $request->input('background_template', 'sky_blue');
-    //     $orientation = $request->input('orientation', 'horizontal');
-
-    //     // Mark ID cards as printed
-    //     $students->each(function ($student) {
-    //         $student->idcardprinted = 'yes';
-    //         $student->save();
-    //     });
-
-    //     return view('schools.generated_id_cards', [
-    //         'students' => $students,
-    //         'school' => $school,
-    //         'template' => $template,
-    //         'orientation' => $orientation,
-    //     ]);
-    // }
+    
     public function generate(Request $request)
     {
         $schoolId = Auth::user()->school_id;
@@ -128,11 +97,22 @@ class IdCardController extends Controller
         ->header('Pragma', 'no-cache')
         ->header('Expires', '0');
     }
+    public function editIDCard(Request $request)
+    {
+         $schoolId = Auth::user()->school_id ?? session('viewing_school');
+         $selectid =SelectedSample::where('school_id',$schoolId)->pluck('sample_id')->toArray();
+         $selectedSample = UploadSample::whereIn('id', $selectid)->first();
+
+         return response()
+        ->view('IDCards.editor', compact('schoolId','selectedSample'))
+        ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        ->header('Pragma', 'no-cache')
+        ->header('Expires', '0');
+    }
 
     protected function buildStudentQuery(Request $request, $schoolId)
     {
         $search = trim($request->input('search', $request->input('student_search', '')));
-
         return Student::with(['studentClass', 'section'])
             ->where('school_id', $schoolId)
             ->when($request->filled('class_id'), function ($query) use ($request) {

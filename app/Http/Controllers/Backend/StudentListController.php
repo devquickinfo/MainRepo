@@ -14,7 +14,9 @@ class StudentListController extends Controller
 {
     public function index(Request $request)
     {
-        $schoolId = Auth::user()->school_id;
+        // Allow superadmin to view students for a specific school when
+        // 'viewing_school' is set in session (set when superadmin views a school)
+        $schoolId = Auth::user()->school_id ?? session('viewing_school');
         $classes = StudentClass::where('school_id', $schoolId)
             ->orderBy('id')
             ->get();

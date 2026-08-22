@@ -40,7 +40,7 @@
         <td>{{ $student->first_name }} {{ $student->last_name }}</td>
         <td>{{ $student->father_name }}</td>
         <td>{{ $student->studentClass->name ?? '-' }}</td>
-        <td>{{ $student->section->name ?? '-' }}</td>
+        <td>{{ $student->getRelation('section')?->name ?? '-' }}</td>
         <td>
            {{--- @if($student->idcardprinted === 'yes')
                 <button type="button"

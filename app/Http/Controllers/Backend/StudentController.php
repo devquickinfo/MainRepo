@@ -182,7 +182,7 @@ class StudentController extends Controller
             ->orderBy('id', 'ASC')
             ->get();
         $students = Student::with(['studentClass', 'section'])->latest()->paginate(10);
-        $school_id = Auth::user()->school_id;
+        $school_id = Auth::user()->school_id ?? session('viewing_school');
         $school = School::where('id', $school_id)->first();
         $idcardsample = null;
         $selectedSample = SelectedSample::where('school_id', $school_id)->first();

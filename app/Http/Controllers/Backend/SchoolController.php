@@ -13,12 +13,18 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Models\SelectedSample;
+use App\Models\UploadSample;
 
 class SchoolController extends Controller
 {
-   public function index()
+    public function index()
     {
         $user = Auth::user();
+
+        // clear any previously set viewing_school when listing schools
+        if (session()->has('viewing_school')) {
+            session()->forget('viewing_school');
+        }
 
         if ($user && $user->role === 'school' && $user->school_id) {
             $school = School::findOrFail($user->school_id);
@@ -26,7 +32,8 @@ class SchoolController extends Controller
             return redirect()->route('schools.show', $school);
         }
 
-        $schools = School::latest()->paginate(10);
+        //$schools = School::latest()->paginate(10);
+        $schools = School::orderBy('school_name', 'asc')->paginate(10);
 
         return view(
             'schools.index',
@@ -126,7 +133,19 @@ class SchoolController extends Controller
             ])
             ->get();
 
-        return view('schools.show', compact('school', 'classes'));
+        // If a superadmin is viewing a school's page, set a session key
+        // so UI and controllers can render school-specific navigation/data.
+        if ($user && $user->role === 'superadmin') {
+            session(['viewing_school' => $school->id]);
+        }
+        $school_id = Auth::user()->school_id ?? session('viewing_school');
+        $idcardsample = null;
+        $selectedSample = SelectedSample::where('school_id', $school_id)->first();
+        if ($selectedSample) {
+            $idcardsample = UploadSample::where('id', $selectedSample->sample_id)->first();
+        }
+
+        return view('schools.show', compact('school', 'classes', 'idcardsample'));
     }
 
     public function edit(School $school)
@@ -400,9 +419,10 @@ class SchoolController extends Controller
     }
     public function saveSample(Request $request)
     {
-        $schoolId = Auth::user()->school_id;
+       
+        $schoolId = Auth::user()->school_id ?? session('viewing_school');
         $sampleId = $request->input('sample_id');
-
+        
         if (!$schoolId || !$sampleId) {
             return redirect()->back()->with('error', 'Invalid school or sample selection.');
         }

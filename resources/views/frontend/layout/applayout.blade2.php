@@ -26,12 +26,27 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
-
+  <style>
+     .content-wrapper {
+        margin-left: 0 !important;
+    }
+    .main-header {
+        margin-left: 0 !important;
+    }
+    .main-footer {
+        margin-left: 0 !important;
+    } 
+  </style>
 </head>
 <body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed text-sm">
   
 <div class="wrapper">
-    <nav class="main-header navbar navbar-expand-md navbar-dark">
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand-md navbar-dark">
+    <a href="{{ route('dashboard') }}" class="navbar-brand">
+      <img src="{{asset('frontend/dist/img/schoolid.jpg')}}" alt="School ID Logo" class="brand-image img-circle elevation-3" style="opacity: .8; width: 30px; height: 30px; object-fit: cover;">
+      <span class="brand-text text-white">School ID Card</span>
+    </a>
     <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -41,16 +56,78 @@
           <i class="fas fa-times"></i>
         </button>
       </div>
+      <ul class="navbar-nav">
+          <li class="nav-item ml-md-3">
+            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                Dashboard
+            </a>
+          </li>
+          @if(session('role') === 'superadmin')
+          <li class="nav-item">
+            <a href="{{ route('student.deleted') }}" class="nav-link {{ request()->routeIs('student.deleted') ? 'active' : '' }}">
+                Deleted Students
+            </a>
+          </li>
+          @endif
+          @if(session('role') !== 'school')
+          <li class="nav-item">
+            <a href="{{ Auth::user()->role === 'school' ? route('schools.show', Auth::user()->school_id) : route('schools.index') }}" class="nav-link {{ request()->routeIs('schools.*') ? 'active' : '' }}">
+                School
+            </a>
+          </li>
+          @endif
+          @if(session('role') === 'school' || session('viewing_school'))
+          {{--<li class="nav-item">
+            <a href="{{ route('students.index') }}" class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
+               Add New Student
+            </a>
+          </li>--}}
+          <li class="nav-item">
+            <a href="{{ route('student.list') }}" class="nav-link">
+              Student
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('idcard.create') }}" class="nav-link">
+                Create ID Card
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('student.import') }}" class="nav-link {{ request()->routeIs('students.import.*') ? 'active' : '' }}">
+               Import Students
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('teacher.list') }}" class="nav-link">
+                Teachers
+            </a>
+          </li>
+          @endif
+          <li class="nav-item">
+              <a href="{{ route('upload-samples.index') }}"
+                class="nav-link {{ request()->routeIs('upload-samples.*') ? 'active' : '' }}">
+                    @if(session('role') === 'school')
+                    Card Sample
+                    @else
+                      Upload Sample
+                    @endif
+              </a>
+          </li>
+           <li class="nav-item">
+            <a href="{{ route('id-card-templates.index') }}" class="nav-link">
+                ID Card Templates
+            </a>
+          </li>
+    </ul>
+   
     <ul class="navbar-nav ml-auto">
       <li class="nav-item d-flex align-items-center">
           <a class="nav-link p-0 d-flex align-items-center" href="#">
               @if(Auth::user()->profilepicture)
-                <a href="{{ asset('storage/' . Auth::user()->profilepicture) }}" target="_blank">
                   <img src="{{ asset('storage/' . Auth::user()->profilepicture) }}"
                       alt="Profile"
                       class="img-circle elevation-2"
                       style="width: 32px; height: 32px; object-fit: cover; display: block;">
-                </a>
               @else
                   <i class="fas fa-user-circle fa-lg"></i>
               @endif
@@ -85,140 +162,96 @@
       </li> -->
     </ul>
   </nav>
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <!-- /.navbar -->
 
-        <!-- Brand -->
-        <a href="{{ route('dashboard') }}" class="brand-link">
-            <img src="{{ asset('frontend/dist/img/schoolid.jpg') }}"
-                alt="School ID Logo"
-                class="brand-image img-circle elevation-3"
-                style="opacity: .8; width: 33px; height: 33px; object-fit: cover;">
-
-            <span class="brand-text font-weight-light">
-                School ID Card
-            </span>
-        </a>
-
-        <!-- Sidebar -->
-        <div class="sidebar">
-
-            <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column"
-                    data-widget="treeview"
-                    role="menu"
-                    data-accordion="false">
-
-                    <!-- Dashboard -->
-                    <li class="nav-item">
-                        <a href="{{ route('dashboard') }}"
-                        class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p>Dashboard</p>
-                        </a>
-                    </li>
-
-                    <!-- Deleted Students -->
-                    @if(session('role') === 'superadmin')
-                    <li class="nav-item">
-                        <a href="{{ route('student.deleted') }}"
-                        class="nav-link {{ request()->routeIs('student.deleted') ? 'active' : '' }}">
-                            <i class="nav-icon fas fa-trash"></i>
-                            <p>Deleted Students</p>
-                        </a>
-                    </li>
+  <!-- Main Sidebar Container -->
+  <!-- <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <a href="{{ route('dashboard') }}" class="brand-link">
+      <img src="{{asset('frontend/dist/img/schoolid.jpg')}}" alt="School ID Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+      <span class="brand-text font-weight-light">School ID Card</span>
+    </a>
+    <div class="sidebar">
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-item menu-open">
+            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>
+                Dashboard
+              </p>
+            </a>
+          </li>
+          @if(session('role') !== 'school')
+          <li class="nav-item">
+            <a href="{{ Auth::user()->role === 'school' ? route('schools.show', Auth::user()->school_id) : route('schools.index') }}" class="nav-link {{ request()->routeIs('schools.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-school"></i>
+              <p>
+                School
+              </p>
+            </a>
+          </li>
+          @endif
+          @if(session('role') === 'school')
+          {{--<li class="nav-item">
+            <a href="{{ route('students.index') }}" class="nav-link {{ request()->routeIs('students.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-user-graduate"></i>
+              <p>
+               Add New Student
+              </p>
+            </a>
+          </li>--}}
+          <li class="nav-item">
+            <a href="{{ route('student.list') }}" class="nav-link">
+              <i class="nav-icon fas fa-user-graduate"></i>
+              <p>
+              Student
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('idcard.create') }}" class="nav-link">
+              <i class="nav-icon fas fa-id-card"></i>
+              <p>
+                Create ID Card
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('student.import') }}" class="nav-link {{ request()->routeIs('students.import.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-file-import"></i>
+              <p>
+               Import Students
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ route('teacher.list') }}" class="nav-link">
+              <i class="nav-icon fas fa-chalkboard-teacher"></i>
+              <p>
+                Teachers
+              </p>
+            </a>
+          </li>
+          @endif
+          <li class="nav-item">
+              <a href="{{ route('upload-samples.index') }}"
+                class="nav-link {{ request()->routeIs('upload-samples.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-id-card"></i>
+                  <p>
+                    @if(session('role') === 'school')
+                    Card Sample
+                    @else
+                      Upload Sample
                     @endif
-
-                    <!-- School -->
-                    @if(session('role') !== 'school')
-                    <li class="nav-item">
-                        <a href="{{ Auth::user()->role === 'school'
-                            ? route('schools.show', Auth::user()->school_id)
-                            : route('schools.index') }}"
-                        class="nav-link {{ request()->routeIs('schools.*') ? 'active' : '' }}">
-
-                            <i class="nav-icon fas fa-school"></i>
-                            <p>School</p>
-                        </a>
-                    </li>
-                    @endif
-
-                    <!-- School Navigation -->
-                    @if(session('role') === 'school' || session('viewing_school'))
-
-                        <!-- Students -->
-                        <li class="nav-item">
-                            <a href="{{ route('student.list') }}"
-                            class="nav-link {{ request()->routeIs('student.list') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-user-graduate"></i>
-                                <p>Students</p>
-                            </a>
-                        </li>
-
-                        <!-- Create ID Card -->
-                        <li class="nav-item">
-                            <a href="{{ route('idcard.create') }}"
-                            class="nav-link {{ request()->routeIs('idcard.create') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-id-card"></i>
-                                <p>Create ID Card</p>
-                            </a>
-                        </li>
-
-                        <!-- Import Students -->
-                        <li class="nav-item">
-                            <a href="{{ route('student.import') }}"
-                            class="nav-link {{ request()->routeIs('students.import.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-file-import"></i>
-                                <p>Import Students</p>
-                            </a>
-                        </li>
-
-                        <!-- Teachers -->
-                        <li class="nav-item">
-                            <a href="{{ route('teacher.list') }}"
-                            class="nav-link {{ request()->routeIs('teacher.list') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-chalkboard-teacher"></i>
-                                <p>Teachers</p>
-                            </a>
-                        </li>
-
-                    @endif
-
-                    <!-- Card Sample / Upload Sample -->
-                    <li class="nav-item">
-                        <a href="{{ route('upload-samples.index') }}"
-                        class="nav-link {{ request()->routeIs('upload-samples.*') ? 'active' : '' }}">
-
-                            <i class="nav-icon fas fa-id-card"></i>
-
-                            <p>
-                                @if(session('role') === 'school' || session('viewing_school'))
-                                    Card Sample
-                                @else
-                                    Upload Sample
-                                @endif
-                            </p>
-                        </a>
-                    </li>
-
-                    <!-- ID Card Templates -->
-                    <li class="nav-item">
-                        <a href="{{ route('id-card-templates.index') }}"
-                        class="nav-link {{ request()->routeIs('id-card-templates.*') ? 'active' : '' }}">
-
-                            <i class="nav-icon fas fa-layer-group"></i>
-                            <p>ID Card Templates</p>
-                        </a>
-                    </li>
-
-                </ul>
-            </nav>
-
-        </div>
-    </aside>
+                  </p>
+              </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside> -->
 
 
-
-  
 
 
   @yield('content')
@@ -229,8 +262,13 @@
 
 
 
- 
- 
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+
+  <!-- Main Footer -->
   <footer class="main-footer">
     <strong>Copyright &copy; {{ date('Y') }} <a href="">IDCard</a>.</strong>
     All rights reserved.

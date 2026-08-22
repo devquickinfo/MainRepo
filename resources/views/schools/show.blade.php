@@ -1,6 +1,32 @@
 @extends('frontend.layout.applayout')
 @section('title', 'School Details')
 @section('content')
+<style>
+    .id-card-template {
+        width: 350px;
+        height: 220px;
+        object-fit: contain;
+        display: block;
+    }
+    .id-card-section {
+        width: 100%;
+    }
+
+    .id-card-preview {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    .id-card-template {
+        width: 350px;
+        max-width: 100%;
+        height: auto;
+        display: block;
+    }
+
+</style>
 <div class="content-wrapper">
     <section class="content-header">
         <div class="container-fluid">
@@ -26,7 +52,7 @@
                         <div>
                             <h4 class="mb-1 font-weight-bold text-dark">
                                 <i class="fas fa-school text-primary mr-2"></i>
-                                {{ $school->school_name }}
+                                {{ ucwords($school->school_name) }}
                             </h4>
 
                             <small class="text-muted">
@@ -76,9 +102,7 @@
                             @endif
                         </div>
                     </div>
-                    <div class="row">
-
-                        {{-- Logo --}}
+                    <div class="row align-items-start">
                         <div class="col-lg-3 col-md-4 mb-3 mb-md-0">
                             <div class="school-logo-box">
 
@@ -95,9 +119,8 @@
 
                             </div>
                         </div>
+                        <div class="col-lg-4 col-md-4 mb-3 mb-md-0">
 
-                        {{-- Contact Information --}}
-                        <div class="col-lg-4 col-md-4">
                             <h6 class="section-title">
                                 <i class="fas fa-address-book mr-2"></i>
                                 Contact Information
@@ -132,48 +155,32 @@
                                     <strong>{{ $school->address ?: 'Not Available' }}</strong>
                                 </div>
                             </div>
+
                         </div>
-
-                        {{-- Location --}}
                         <div class="col-lg-5 col-md-4">
-                            <h6 class="section-title">
-                                <i class="fas fa-map-marked-alt mr-2"></i>
-                                Location
-                            </h6>
-
-                            <div class="row">
-
-                                <div class="col-6">
-                                    <div class="mini-info">
-                                        <small>City</small>
-                                        <strong>{{ $school->city ?: '-' }}</strong>
-                                    </div>
+                            <div class="id-card-section">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h6 class="section-title mb-0">
+                                        <i class="fas fa-id-card mr-2"></i>
+                                        Live ID Card Preview
+                                    </h6>
+                                    <a href="{{ route('idcard.editor') }}"
+                                    class="btn btn-sm btn-warning ml-auto"
+                                    target="_blank">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
                                 </div>
-
-                                <div class="col-6">
-                                    <div class="mini-info">
-                                        <small>State</small>
-                                        <strong>{{ $school->state ?: '-' }}</strong>
+                                @if($idcardsample)
+                                    <div class="id-card-preview">
+                                        <img src="{{ asset('storage/' . $idcardsample->file_path) }}" class="id-card-template img-fluid img-thumbnail" alt="ID Card Template">
                                     </div>
-                                </div>
-
-                                <div class="col-6">
-                                    <div class="mini-info">
-                                        <small>Pincode</small>
-                                        <strong>{{ $school->pincode ?: '-' }}</strong>
+                                @else
+                                    <div class="alert alert-warning">
+                                        No ID card sample selected.
                                     </div>
-                                </div>
-
-                                <div class="col-6">
-                                    <div class="mini-info">
-                                        <small>School Code</small>
-                                        <strong>{{ $school->school_code }}</strong>
-                                    </div>
-                                </div>
-
+                                @endif
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -192,14 +199,17 @@
                                         <div class="card h-100 cursor-pointer">
                                             <div class="card-header bg-primary text-white d-flex align-items-center w-100">
                                                 <h3 class="card-title mb-0 flex-grow-1">{{ $class->name }}</h3>
-                                                <span class="badge bg-light text-dark ms-3">
+                                                <span class="badge bg-light text-dark ms-3" style="font-size: 0.9rem;">
                                                     {{ App\Models\Student::where('class_id', $class->id)->where('school_id', $school->id)->count() }} Students
                                                 </span>
                                             </div>
                                             <div class="card-body">
                                                 <p class="mb-0 text-muted">Click to view students</p>
-                                                <p class="mb-0 mt-2 text-danger">
-                                                    {{ App\Models\Student::where('class_id', $class->id)->where('school_id', $school->id)->whereNull('capturephoto')->count() }} students without capture photo
+                                                <p class="mb-0 mt-2 text-success" style="font-size: 1rem;">
+                                                    {{ App\Models\Student::where('class_id', $class->id)->where('school_id', $school->id)->whereNull('photo')->count() }} students without capture photo
+                                                </p>
+                                                 <p class="mb-0 mt-2 text-danger" style="font-size: 1rem;">
+                                                    {{ App\Models\Student::where('class_id', $class->id)->where('school_id', $school->id)->where('idcardprinted', 'no')->count() }} students without printed ID cards
                                                 </p>
                                             </div>
                                         </div>

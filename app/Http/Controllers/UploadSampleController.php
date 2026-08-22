@@ -14,47 +14,6 @@ class UploadSampleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    // public function index()
-    // {
-    //     $selectedSample = null;
-    //     if (session('role') === 'school') {
-    //         $selectedSample = SelectedSample::where(
-    //             'school_id',
-    //             Auth::user()->school_id
-    //         )->first();
-    //     }
-    //     $alls=UploadSample::all();
-    //     return view('schools.uploadsample',compact('alls', 'selectedSample'));
-    // }
-    // public function index()
-    // {
-    //     $selectedSample = null;
-
-    //     if (session('role') === 'school') {
-
-    //         $schoolId = Auth::user()->school_id;
-
-    //         $selectedSample = SelectedSample::where(
-    //             'school_id',
-    //             $schoolId
-    //         )->first();
-
-    //         $alls = UploadSample::where(function ($query) use ($schoolId) {
-    //             $query->whereNull('school_id')
-    //                 ->orWhere('school_id', $schoolId);
-    //         })->get();
-
-    //     } else {
-
-    //         // Admin sees all samples
-    //         $alls = UploadSample::all();
-    //     }
-
-    //     return view(
-    //         'schools.uploadsample',
-    //         compact('alls', 'selectedSample')
-    //     );
-    // }
     public function index()
     {
         $selectedSample = null;
@@ -100,35 +59,7 @@ class UploadSampleController extends Controller
      * Store a newly created resource in storage.
      */
     
-    // public function store(Request $request)
-    // {
-       
-    //     $request->validate([
-    //         'upload_samples' => 'required|image|max:40960',
-    //         'image_name'     => 'required|string|max:255',
-    //         //'caption'        => 'nullable|string|max:255',
-    //         'orientation'    => 'required|in:horizontal,vertical',
-    //     ]);
-
-    //     $file = $request->file('upload_samples');
-
-    //     $path = $file->store('samples', 'public');
-
-    //     UploadSample::create([
-    //         'name'        => $request->input('image_name'),
-    //         'file_path'   => $path,
-    //         'caption'     => $request->input('caption'),
-    //         'orientation' => $request->input('orientation'),
-    //     ]);
-
-    //     session()->flash('success', 'Sample uploaded successfully.');
-
-    //     return response()->json([
-    //         'success'  => true,
-    //         'message'  => 'Sample uploaded successfully.',
-    //         'redirect' => route('upload-samples.index'),
-    //     ]);
-    // }
+   
     public function store(Request $request)
     {
         $request->validate([
@@ -137,9 +68,7 @@ class UploadSampleController extends Controller
             'caption'        => 'nullable|string|max:255',
             'orientation'    => 'required|in:horizontal,vertical',
         ]);
-
         $file = $request->file('upload_samples');
-
         $path = $file->store('samples', 'public');
 
         $schoolId = session('role') === 'school'

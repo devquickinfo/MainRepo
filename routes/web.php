@@ -119,5 +119,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/id-card-templates/{template}/generate', 
         [IdCardTemplateController::class, 'generate']
     )->name('id-card-templates.generate');
+    Route::get('idcard-editor', [IdCardController::class, 'editIDCard'])->name('idcard.editor');
 
 });

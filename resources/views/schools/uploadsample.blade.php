@@ -52,7 +52,7 @@
                             </button>
                         </form>
 
-                        @if(session('role') !== 'school')
+                        @if(session('role') !== 'school' && !session('viewing_school'))
 
                             <div class="ml-auto">
                                 <a href="{{ route('upload-samples.create') }}"
@@ -61,7 +61,7 @@
                                 </a>
                             </div>
 
-                        @else
+                        @elseif(session('role') === 'school' || session('viewing_school'))
 
                             <div class="ml-auto">
                                 <a href="{{ route('upload-samples.create') }}"
@@ -87,19 +87,8 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    @if(session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-
-                            <button type="button"
-                                    class="close"
-                                    data-dismiss="alert"
-                                    aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                    @endif
                     @if(session('role') === 'school')
+                        {{-- SCHOOL --}}
                         {{-- TABS --}}
                         <ul class="nav nav-tabs mb-4"
                             id="sampleTabs"

@@ -45,7 +45,7 @@
                       <tbody>
                       @foreach($schools as $school)
                       <tr>
-                        <td>{{ $school->school_name }}</td>
+                        <td>{{ str_replace('"', '', $school->school_name) }}</td>
                         <td>{{ $school->school_code }}</td>
                         <td>{{ $school->email }}</td>
                         <td>{{ $school->phone }}</td>

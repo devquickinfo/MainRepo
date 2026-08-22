@@ -2,7 +2,7 @@
     <div class="card h-100">
         <div class="card-header bg-primary text-white d-flex align-items-center">
             <h3 class="card-title mb-0 flex-grow-1">
-                @if(session('role') === 'school')
+                @if(session('role') === 'school' || session('viewing_school') )
                     <label class="mb-0 d-flex align-items-center">
                         <input
                             type="radio"

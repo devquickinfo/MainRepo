@@ -18,12 +18,36 @@ use Illuminate\Validation\Rule;
 
 class IdCardTemplateController extends Controller
 {
+
+    /**
+     * Resolve the effective school id for the current action.
+     * For superadmin, prefer session('viewing_school') set when viewing a school.
+     */
+    private function resolveSchoolId()
+    {
+        $user = Auth::user();
+
+        if ($user && $user->role === 'superadmin') {
+            $schoolId = session('viewing_school');
+            if (! $schoolId) {
+                abort(403, 'No school selected.');
+            }
+            return $schoolId;
+        }
+
+        if (! $user || ! $user->school_id) {
+            abort(403);
+        }
+
+        return $user->school_id;
+    }
+
     /**
      * Display all templates for logged-in school.
      */
     public function index()
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $templates = IdCardTemplate::where('school_id', $schoolId)
             ->withCount('fields')
@@ -48,7 +72,7 @@ class IdCardTemplateController extends Controller
      */
     public function store(Request $request)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $request->validate([
             'name' => [
@@ -135,7 +159,7 @@ class IdCardTemplateController extends Controller
      */
     public function designer($id)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $template = IdCardTemplate::with('fields')
             ->where('school_id', $schoolId)
@@ -153,7 +177,7 @@ class IdCardTemplateController extends Controller
      */
     public function saveFields(Request $request, $id)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $template = IdCardTemplate::where('school_id', $schoolId)
             ->findOrFail($id);
@@ -354,7 +378,7 @@ class IdCardTemplateController extends Controller
      */
     public function edit($id)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $template = IdCardTemplate::where('school_id', $schoolId)
             ->findOrFail($id);
@@ -371,7 +395,7 @@ class IdCardTemplateController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $template = IdCardTemplate::where('school_id', $schoolId)
             ->findOrFail($id);
@@ -466,7 +490,7 @@ class IdCardTemplateController extends Controller
      */
     public function destroy($id)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $template = IdCardTemplate::where('school_id', $schoolId)
             ->findOrFail($id);
@@ -517,7 +541,7 @@ class IdCardTemplateController extends Controller
      */
     public function activate($id)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $template = IdCardTemplate::where('school_id', $schoolId)
             ->findOrFail($id);
@@ -558,7 +582,7 @@ class IdCardTemplateController extends Controller
      */
     public function selectStudents(Request $request, $id)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $template = IdCardTemplate::with('fields')
             ->where('school_id', $schoolId)
@@ -608,7 +632,7 @@ class IdCardTemplateController extends Controller
      */
     public function generate(Request $request, $id)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = $this->resolveSchoolId();
 
         $template = IdCardTemplate::with('fields')
             ->where('school_id', $schoolId)

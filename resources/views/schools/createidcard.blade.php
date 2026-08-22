@@ -93,21 +93,15 @@
             </div>
 
             <div class="card-body">
-
                 <form action="{{ route('idcard.create') }}" method="GET" id="idCardFilterForm" enctype="multipart/form-data">
-
                     <div class="row">
-
-                        <!-- Class -->
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="class_id">Class</label>
-
                                 <select name="class_id"
                                         id="class_id"
                                         class="form-control" onchange="this.form.submit()">
                                     <option value="">All Classes</option>
-
                                     @foreach($classes as $class)
                                         <option value="{{ $class->id }}"
                                             {{ request('class_id') == $class->id ? 'selected' : '' }}>
@@ -117,12 +111,9 @@
                                 </select>
                             </div>
                         </div>
-
-                        <!-- Section -->
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="section_id">Section</label>
-
                                 <select name="section_id"
                                         id="section_id"
                                         class="form-control" onchange="this.form.submit()">
@@ -137,20 +128,14 @@
                                 </select>
                             </div>
                         </div>
-
-                        <!-- Background Template -->
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="background_template">
                                     Background Template
                                 </label>
-
                                 <select name="background_template"
                                         id="background_template"
                                         class="form-control" onchange="this.form.submit()">>
-
-                                    <!-- <option value="">All Templates</option> -->
-
                                     <option value="sky_blue"
                                         {{ request('background_template') == 'sky_blue' ? 'selected' : '' }}>
                                         Sky Blue
@@ -322,30 +307,21 @@
                     </span> -->
                 </div>
             </div>
-
+            </form>
             <div class="card-body p-0">
-
-                <form action="{{ route('idcard.generate') }}"
-                      method="POST"
-                      id="generateIdCardForm" target="_blank">
-
+                <form action="{{ route('idcard.generate') }}"  method="POST" id="generateIdCardForm" target="_blank">
                     @csrf
-
                     <input type="hidden"
                            name="background_template"
                            id="backgroundTemplateInput"
                            value="{{ request('background_template') }}">
-
                     <input type="hidden"
                            name="orientation"
                            id="orientationInput"
                            value="{{ request('orientation') }}">
-
                     <div id="selectedStudentIdsContainer"></div>
-
                     <div class="table-responsive p-0">
                         <table class="table table-bordered table-hover mb-0 responsive-table">
-
                             <thead>
                                 <tr>
                                     <th width="40">
@@ -355,7 +331,6 @@
                                             <label for="selectAll"></label>
                                         </div>
                                     </th>
-
                                     <th>Photo</th>
                                     <th>Admission No</th>
                                     <th>Student Name</th>
@@ -382,7 +357,6 @@
                                 </div>
                             </div>
                     </div>
-                     </form>
                     @if(optional($students)->count() > 0)
 
                         <div class="card-footer">
