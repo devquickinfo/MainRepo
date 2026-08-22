@@ -26,7 +26,7 @@ class MainidcardController extends Controller
             'school_id',
             $schoolId
         )->exists();
-
+        Mainidcard::where('school_id', $schoolId)->delete();
         $mainidcard = Mainidcard::create([
             'school_id' => $schoolId,
             'name' => $validated['name'],
@@ -37,6 +37,7 @@ class MainidcardController extends Controller
             'layout' => $validated['layout'],
             'is_default' => $isFirst,
         ]);
+        
 
         return response()->json([
             'success' => true,
