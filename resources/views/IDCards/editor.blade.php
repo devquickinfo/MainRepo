@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<title>ID Card Editor — Mother's Pride School</title>
+<title>ID Card Editor — {{ ucwords($school->school_name ?? " ") }}</title>
 <style>
   :root{
     --maroon:#9e1b32;
@@ -378,10 +378,10 @@
           <input type="file" id="logoUpload" accept="image/*">
         </label>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="logoX" value="30"></div>
-          <div class="field"><label>Y</label><input type="number" id="logoY" value="20"></div>
-          <div class="field"><label>W</label><input type="number" id="logoW" value="80"></div>
-          <div class="field"><label>H</label><input type="number" id="logoH" value="80"></div>
+          <div class="field"><label>X</label><input type="number" id="logoX" value="{{ $designcard->layout['fields']['logo']['x'] ?? 30 }}"></div>
+          <div class="field"><label>Y</label><input type="number" id="logoY" value="{{ $designcard->layout['fields']['logo']['y'] ?? 20 }}"></div>
+          <div class="field"><label>W</label><input type="number" id="logoW" value="{{ $designcard->layout['fields']['logo']['width'] ?? 80 }}"></div>
+          <div class="field"><label>H</label><input type="number" id="logoH" value="{{ $designcard->layout['fields']['logo']['height'] ?? 80 }}"></div>
         </div>
       </div>
     </div>
@@ -390,18 +390,18 @@
     <div class="group">
       <div class="group-title"><h3>School Name</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="schoolNameToggle"  @if(isset($designcard->layout['fields']['schoolName'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
-        <div class="field"><label>Text</label><input type="text" id="schoolNameText" value="Mother's Pride School"></div>
+        <div class="field"><label>Text</label><input type="text" id="schoolNameText" value="{{ $designcard->layout['fields']['schoolName']['text'] ?? ($school->school_name ?? '') }}"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="schoolNameX" value="130"></div>
-          <div class="field"><label>Y</label><input type="number" id="schoolNameY" value="25"></div>
-          <div class="field"><label>Size</label><input type="number" id="schoolNameSize" value="28"></div>
+          <div class="field"><label>X</label><input type="number" id="schoolNameX" value="{{ $designcard->layout['fields']['schoolName']['x'] ?? 130 }}"></div>
+          <div class="field"><label>Y</label><input type="number" id="schoolNameY" value="{{ $designcard->layout['fields']['schoolName']['y'] ?? 25 }}"></div>
+          <div class="field"><label>Size</label><input type="number" id="schoolNameSize" value="{{ $designcard->layout['fields']['schoolName']['size'] ?? 28 }}"></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Color</label><input type="color" id="schoolNameColor" value="#9e1b32"></div>
+          <div class="field"><label>Color</label><input type="color" id="schoolNameColor" value="{{ $designcard->layout['fields']['schoolName']['color'] ?? '#9e1b32' }}"></div>
           <div class="field"><label>Weight</label>
             <select id="schoolNameWeight">
-              <option value="700" selected>Bold</option>
-              <option value="400">Normal</option>
+              <option value="700" @if(isset($designcard->layout['fields']['schoolName']['weight']) && $designcard->layout['fields']['schoolName']['weight'] == 700) selected @endif>Bold</option>
+              <option value="400" @if(isset($designcard->layout['fields']['schoolName']['weight']) && $designcard->layout['fields']['schoolName']['weight'] == 400) selected @endif>Normal</option>
             </select>
           </div>
         </div>
@@ -414,16 +414,16 @@
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="addressText" value="123 Education Lane, Varanasi, UP - 221001"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="addressX" value="130"></div>
-          <div class="field"><label>Y</label><input type="number" id="addressY" value="62"></div>
-          <div class="field"><label>Size</label><input type="number" id="addressSize" value="13"></div>
+          <div class="field"><label>X</label><input type="number" id="addressX" value="{{ $designcard->layout['fields']['address']['x'] ?? 130 }}"></div>
+          <div class="field"><label>Y</label><input type="number" id="addressY" value="{{ $designcard->layout['fields']['address']['y'] ?? 62 }}"></div>
+          <div class="field"><label>Size</label><input type="number" id="addressSize" value="{{ $designcard->layout['fields']['address']['size'] ?? 13 }}"></div>
         </div>
         <div class="row2">
-         <div class="field"><label>Color</label><input type="color" id="addressColor" value="#1f2430"></div>
+         <div class="field"><label>Color</label><input type="color" id="addressColor" value="@php echo $designcard->layout['fields']['address']['color'] ?? '#1f2430'; @endphp"></div>
           <div class="field"><label>Weight</label>
             <select id="addressWeight">
-              <option value="700" selected>Bold</option>
-              <option value="400">Normal</option>
+              <option value="700" @php echo (isset($designcard->layout['fields']['address']['weight']) && $designcard->layout['fields']['address']['weight'] == 700) ? 'selected' : ''; @endphp>Bold</option>
+              <option value="400" @php echo (isset($designcard->layout['fields']['address']['weight']) && $designcard->layout['fields']['address']['weight'] == 400) ? 'selected' : ''; @endphp>Normal</option>
             </select>
           </div>
         </div>
@@ -436,16 +436,16 @@
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="sessionText" value="Session: 2026-2027"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="sessionX" value="130"></div>
-          <div class="field"><label>Y</label><input type="number" id="sessionY" value="86"></div>
-          <div class="field"><label>Size</label><input type="number" id="sessionSize" value="13"></div>
+          <div class="field"><label>X</label><input type="number" id="sessionX" value="@php echo $designcard->layout['fields']['session']['x'] ?? 130; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="sessionY" value="@php echo $designcard->layout['fields']['session']['y'] ?? 86; @endphp"></div>
+          <div class="field"><label>Size</label><input type="number" id="sessionSize" value="@php echo $designcard->layout['fields']['session']['size'] ?? 13; @endphp"></div>
         </div>
         <div class="row2">
-         <div class="field"><label>Color</label><input type="color" id="sessionColor" value="#1f2430"></div>
+         <div class="field"><label>Color</label><input type="color" id="sessionColor" value="@php echo $designcard->layout['fields']['session']['color'] ?? '#1f2430'; @endphp"></div>
           <div class="field"><label>Weight</label>
             <select id="sessionWeight">
-              <option value="700" selected>Bold</option>
-              <option value="400">Normal</option>
+              <option value="700" @php echo (isset($designcard->layout['fields']['session']['weight']) && $designcard->layout['fields']['session']['weight'] == 700) ? 'selected' : ''; @endphp>Bold</option>
+              <option value="400" @php echo (isset($designcard->layout['fields']['session']['weight']) && $designcard->layout['fields']['session']['weight'] == 400) ? 'selected' : ''; @endphp>Normal</option>
             </select>
           </div>
         </div>
@@ -462,8 +462,8 @@
         <div class="row4">
           <div class="field"><label>X</label><input type="number" id="photoX" value="@php echo $designcard->layout['fields']['photo']['x'] ?? 55; @endphp"></div>
           <div class="field"><label>Y</label><input type="number" id="photoY" value="@php echo $designcard->layout['fields']['photo']['y'] ?? 325; @endphp"></div>
-          <div class="field"><label>W</label><input type="number" id="photoW" value="@php echo $designcard->layout['fields']['photo']['w'] ?? 150; @endphp"></div>
-          <div class="field"><label>H</label><input type="number" id="photoH" value="@php echo $designcard->layout['fields']['photo']['h'] ?? 150; @endphp"></div>
+          <div class="field"><label>W</label><input type="number" id="photoW" value="@php echo $designcard->layout['fields']['photo']['width'] ?? 150; @endphp"></div>
+          <div class="field"><label>H</label><input type="number" id="photoH" value="@php echo $designcard->layout['fields']['photo']['height'] ?? 150; @endphp"></div>
         </div>
       </div>
     </div>
@@ -479,11 +479,11 @@
           <div class="field"><label>Size</label><input type="number" id="nameSize" value="@php echo $designcard->layout['fields']['name']['size'] ?? 24; @endphp"></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Color</label><input type="color" id="nameColor" value="#16009f"></div>
+          <div class="field"><label>Color</label><input type="color" id="nameColor" value="@php echo $designcard->layout['fields']['name']['color'] ?? '#16009f'; @endphp"></div>
           <div class="field"><label>Weight</label>
             <select id="nameWeight">
-              <option value="700" selected>Bold</option>
-              <option value="400">Normal</option>
+              <option value="700" @php echo (isset($designcard->layout['fields']['name']['weight']) && $designcard->layout['fields']['name']['weight'] == 700) ? 'selected' : ''; @endphp>Bold</option>
+              <option value="400" @php echo (isset($designcard->layout['fields']['name']['weight']) && $designcard->layout['fields']['name']['weight'] == 400) ? 'selected' : ''; @endphp>Normal</option>
             </select>
           </div>
         </div>
@@ -501,11 +501,11 @@
           <div class="field"><label>Size</label><input type="number" id="fatherSize" value="@php echo $designcard->layout['fields']['father']['size'] ?? 15; @endphp"></div>
         </div>
         <div class="row2">
-           <div class="field"><label>Color</label><input type="color" id="fatherColor" value="#1f2430"></div>
+           <div class="field"><label>Color</label><input type="color" id="fatherColor" value="@php echo $designcard->layout['fields']['father']['color'] ?? '#1f2430'; @endphp"></div>
             <div class="field"><label>Weight</label>
               <select id="fatherWeight">
-                <option value="700" selected>Bold</option>
-                <option value="400">Normal</option>
+                <option value="700" @php echo (isset($designcard->layout['fields']['father']['weight']) && $designcard->layout['fields']['father']['weight'] == 700) ? 'selected' : ''; @endphp>Bold</option>
+                <option value="400" @php echo (isset($designcard->layout['fields']['father']['weight']) && $designcard->layout['fields']['father']['weight'] == 400) ? 'selected' : ''; @endphp>Normal</option>
               </select>
             </div>
         </div>
@@ -523,11 +523,11 @@
           <div class="field"><label>Size</label><input type="number" id="motherSize" value="@php echo $designcard->layout['fields']['mother']['size'] ?? 15; @endphp"></div>
         </div>
         <div class="row2">
-           <div class="field"><label>Color</label><input type="color" id="motherColor" value="#1f2430"></div>
+           <div class="field"><label>Color</label><input type="color" id="motherColor" value="@php echo $designcard->layout['fields']['mother']['color'] ?? '#1f2430'; @endphp"></div>
             <div class="field"><label>Weight</label>
               <select id="motherWeight">
-                <option value="700" selected>Bold</option>
-                <option value="400">Normal</option>
+                <option value="700" @php echo (isset($designcard->layout['fields']['mother']['weight']) && $designcard->layout['fields']['mother']['weight'] == 700) ? 'selected' : ''; @endphp>Bold</option>
+                <option value="400" @php echo (isset($designcard->layout['fields']['mother']['weight']) && $designcard->layout['fields']['mother']['weight'] == 400) ? 'selected' : ''; @endphp>Normal</option>
               </select>
             </div>
         </div>
@@ -545,11 +545,11 @@
           <div class="field"><label>Size</label><input type="number" id="classSize" value="@php echo $designcard->layout['fields']['class']['size'] ?? 15; @endphp"></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Color</label><input type="color" id="classColor" value="#1f2430"></div>
+          <div class="field"><label>Color</label><input type="color" id="classColor" value="@php echo $designcard->layout['fields']['class']['color'] ?? '#1f2430'; @endphp"></div>
           <div class="field"><label>Weight</label>
             <select id="classWeight">
-              <option value="700" selected>Bold</option>
-              <option value="400">Normal</option>
+              <option value="700" @php echo (isset($designcard->layout['fields']['class']['weight']) && $designcard->layout['fields']['class']['weight'] == 700) ? 'selected' : ''; @endphp>Bold</option>
+              <option value="400" @php echo (isset($designcard->layout['fields']['class']['weight']) && $designcard->layout['fields']['class']['weight'] == 400) ? 'selected' : ''; @endphp>Normal</option>
             </select>
           </div>
         </div>
@@ -567,11 +567,11 @@
           <div class="field"><label>Size</label><input type="number" id="dobSize" value="@php echo $designcard->layout['fields']['dob']['size'] ?? 15; @endphp"></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Color</label><input type="color" id="dobColor" value="#1f2430"></div>
+          <div class="field"><label>Color</label><input type="color" id="dobColor" value="@php echo $designcard->layout['fields']['dob']['color'] ?? '#1f2430'; @endphp"></div>
           <div class="field"><label>Weight</label>
             <select id="dobWeight">
-              <option value="700" selected>Bold</option>
-              <option value="400">Normal</option>
+              <option value="700" @php echo (isset($designcard->layout['fields']['dob']['weight']) && $designcard->layout['fields']['dob']['weight'] == 700) ? 'selected' : ''; @endphp>Bold</option>
+              <option value="400" @php echo (isset($designcard->layout['fields']['dob']['weight']) && $designcard->layout['fields']['dob']['weight'] == 400) ? 'selected' : ''; @endphp>Normal</option>
             </select>
           </div>
         </div>
@@ -589,11 +589,11 @@
           <div class="field"><label>Size</label><input type="number" id="admSize" value="@php echo $designcard->layout['fields']['adm']['size'] ?? 15; @endphp"></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Color</label><input type="color" id="admColor" value="#1f2430"></div>
+          <div class="field"><label>Color</label><input type="color" id="admColor" value="@php echo $designcard->layout['fields']['adm']['color'] ?? '#1f2430'; @endphp"></div>
           <div class="field"><label>Weight</label>
             <select id="admWeight">
-              <option value="700" selected>Bold</option>
-              <option value="400">Normal</option>
+              <option value="700" @php echo (isset($designcard->layout['fields']['adm']['weight']) && $designcard->layout['fields']['adm']['weight'] == 700) ? 'selected' : ''; @endphp>Bold</option>
+              <option value="400" @php echo (isset($designcard->layout['fields']['adm']['weight']) && $designcard->layout['fields']['adm']['weight'] == 400) ? 'selected' : ''; @endphp>Normal</option>
             </select>
           </div>
         </div>
@@ -611,11 +611,11 @@
           <div class="field"><label>Size</label><input type="number" id="bloodSize" value="@php echo $designcard->layout['fields']['blood']['size'] ?? 13; @endphp"></div>
         </div>
         <div class="row2">
-          <div class="field"><label>Color</label><input type="color" id="bloodColor" value="#ffffff"></div>
+          <div class="field"><label>Color</label><input type="color" id="bloodColor" value="@php echo $designcard->layout['fields']['blood']['color'] ?? '#ffffff'; @endphp"></div>
           <div class="field"><label>Weight</label>
             <select id="bloodWeight">
-              <option value="700" selected>Bold</option>
-              <option value="400">Normal</option>
+              <option value="700" @php echo (isset($designcard->layout['fields']['blood']['weight']) && $designcard->layout['fields']['blood']['weight'] == 700) ? 'selected' : ''; @endphp>Bold</option>
+              <option value="400" @php echo (isset($designcard->layout['fields']['blood']['weight']) && $designcard->layout['fields']['blood']['weight'] == 400) ? 'selected' : ''; @endphp>Normal</option>
             </select>
           </div>
         </div>

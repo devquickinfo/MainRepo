@@ -11,7 +11,7 @@ class MainidcardController extends Controller
 {
     public function store(Request $request)
     {
-        $schoolId = Auth::user()->school_id;
+        $schoolId = Auth::user()->school_id ?? session('viewing_school');
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
