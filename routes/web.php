@@ -11,6 +11,7 @@ use App\Http\Controllers\Backend\SchoolController;
 use App\Http\Controllers\Backend\StudentImportController;
 use App\Http\Controllers\UploadSampleController;
 use App\Http\Controllers\IdCardTemplateController;
+use App\Http\Controllers\MainidcardController;
 
 
 
@@ -120,5 +121,7 @@ Route::middleware('auth')->group(function () {
         [IdCardTemplateController::class, 'generate']
     )->name('id-card-templates.generate');
     Route::get('idcard-editor', [IdCardController::class, 'editIDCard'])->name('idcard.editor');
+
+    Route::post('/mainidcard/save',[MainidcardController::class, 'store'])->name('mainidcard.store');
 
 });

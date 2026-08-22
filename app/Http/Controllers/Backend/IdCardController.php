@@ -11,6 +11,7 @@ use App\Models\UploadSample;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Models\Mainidcard;
 
 class IdCardController extends Controller
 {
@@ -102,9 +103,15 @@ class IdCardController extends Controller
          $schoolId = Auth::user()->school_id ?? session('viewing_school');
          $selectid =SelectedSample::where('school_id',$schoolId)->pluck('sample_id')->toArray();
          $selectedSample = UploadSample::whereIn('id', $selectid)->first();
-
+         $school = School::find($schoolId);
+         $idCardData=Mainidcard::where('school_id',$schoolId)->first();
+         if($idCardData){
+            $designcard=$idCardData;
+         } else {
+            $designcard = null;
+         }
          return response()
-        ->view('IDCards.editor', compact('schoolId','selectedSample'))
+        ->view('IDCards.editor', compact('schoolId','selectedSample','designcard','school'))
         ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
         ->header('Pragma', 'no-cache')
         ->header('Expires', '0');

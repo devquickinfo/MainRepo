@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <title>ID Card Editor — Mother's Pride School</title>
 <style>
   :root{
@@ -321,10 +322,26 @@
 <div class="topbar">
   <div>
     <h1>ID Card Editor</h1>
-    <div class="sub">Mother's Pride School · drag fields on the card or use the controls</div>
+    <div class="sub">{{ ucwords($school->school_name ?? " ") }} · drag fields on the card or use the controls</div>
   </div>
   <button id="exportLayoutBtn" style="margin-right:8px;background:#fff;color:var(--maroon-dark);border:1px solid #fff;">💾 Export Layout</button>
-  <button id="importLayoutBtn" style="margin-right:8px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6);">📂 Import Layout</button>
+  <!-- <button id="importLayoutBtn" style="margin-right:8px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.6);">📂 Import Layout</button> -->
+   <button
+            type="button"
+            id="saveLayoutBtn"
+            style="
+                background:#28a745;
+                color:#fff;
+                border:none;
+                padding:9px 16px;
+                border-radius:6px;
+                font-weight:700;
+                font-size:13px;
+                cursor:pointer;
+            "
+        >
+            💾 Save ID Card
+        </button>
   <input type="file" id="importLayoutFile" accept="application/json" style="display:none;">
   <button id="downloadBtn">⬇ Download PNG</button>
 </div>
@@ -355,7 +372,7 @@
 
     <!-- SCHOOL LOGO -->
     <div class="group">
-      <div class="group-title"><h3>School Logo</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="logoToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>School Logo</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="logoToggle"  @if(isset($designcard->layout['fields']['logo'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <label class="filebtn">Click to upload logo
           <input type="file" id="logoUpload" accept="image/*">
@@ -371,7 +388,7 @@
 
     <!-- SCHOOL NAME -->
     <div class="group">
-      <div class="group-title"><h3>School Name</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="schoolNameToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>School Name</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="schoolNameToggle"  @if(isset($designcard->layout['fields']['schoolName'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="schoolNameText" value="Mother's Pride School"></div>
         <div class="row4">
@@ -393,7 +410,7 @@
 
     <!-- ADDRESS -->
     <div class="group">
-      <div class="group-title"><h3>Address</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="addressToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Address</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="addressToggle" @if(isset($designcard->layout['fields']['address'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="addressText" value="123 Education Lane, Varanasi, UP - 221001"></div>
         <div class="row4">
@@ -401,13 +418,21 @@
           <div class="field"><label>Y</label><input type="number" id="addressY" value="62"></div>
           <div class="field"><label>Size</label><input type="number" id="addressSize" value="13"></div>
         </div>
-        <div class="field"><label>Color</label><input type="color" id="addressColor" value="#1f2430"></div>
+        <div class="row2">
+         <div class="field"><label>Color</label><input type="color" id="addressColor" value="#1f2430"></div>
+          <div class="field"><label>Weight</label>
+            <select id="addressWeight">
+              <option value="700" selected>Bold</option>
+              <option value="400">Normal</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- SESSION -->
     <div class="group">
-      <div class="group-title"><h3>Session</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="sessionToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Session</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="sessionToggle" @if(isset($designcard->layout['fields']['session'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="sessionText" value="Session: 2026-2027"></div>
         <div class="row4">
@@ -415,35 +440,43 @@
           <div class="field"><label>Y</label><input type="number" id="sessionY" value="86"></div>
           <div class="field"><label>Size</label><input type="number" id="sessionSize" value="13"></div>
         </div>
-        <div class="field"><label>Color</label><input type="color" id="sessionColor" value="#1f2430"></div>
+        <div class="row2">
+         <div class="field"><label>Color</label><input type="color" id="sessionColor" value="#1f2430"></div>
+          <div class="field"><label>Weight</label>
+            <select id="sessionWeight">
+              <option value="700" selected>Bold</option>
+              <option value="400">Normal</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- STUDENT PHOTO -->
     <div class="group">
-      <div class="group-title"><h3>Student Photo</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="photoToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Student Photo</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="photoToggle" @if(isset($designcard->layout['fields']['photo'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <label class="filebtn">Click to upload photo
           <input type="file" id="photoUpload" accept="image/*">
         </label>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="photoX" value="55"></div>
-          <div class="field"><label>Y</label><input type="number" id="photoY" value="325"></div>
-          <div class="field"><label>W</label><input type="number" id="photoW" value="150"></div>
-          <div class="field"><label>H</label><input type="number" id="photoH" value="150"></div>
+          <div class="field"><label>X</label><input type="number" id="photoX" value="@php echo $designcard->layout['fields']['photo']['x'] ?? 55; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="photoY" value="@php echo $designcard->layout['fields']['photo']['y'] ?? 325; @endphp"></div>
+          <div class="field"><label>W</label><input type="number" id="photoW" value="@php echo $designcard->layout['fields']['photo']['w'] ?? 150; @endphp"></div>
+          <div class="field"><label>H</label><input type="number" id="photoH" value="@php echo $designcard->layout['fields']['photo']['h'] ?? 150; @endphp"></div>
         </div>
       </div>
     </div>
 
     <!-- STUDENT NAME -->
     <div class="group">
-      <div class="group-title"><h3>Student Name</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="nameToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Student Name</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="nameToggle" @if(isset($designcard->layout['fields']['name'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="nameText" value="AARAV SHARMA"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="nameX" value="230"></div>
-          <div class="field"><label>Y</label><input type="number" id="nameY" value="340"></div>
-          <div class="field"><label>Size</label><input type="number" id="nameSize" value="24"></div>
+          <div class="field"><label>X</label><input type="number" id="nameX" value="@php echo $designcard->layout['fields']['name']['x'] ?? 230; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="nameY" value="@php echo $designcard->layout['fields']['name']['y'] ?? 340; @endphp"></div>
+          <div class="field"><label>Size</label><input type="number" id="nameSize" value="@php echo $designcard->layout['fields']['name']['size'] ?? 24; @endphp"></div>
         </div>
         <div class="row2">
           <div class="field"><label>Color</label><input type="color" id="nameColor" value="#16009f"></div>
@@ -459,114 +492,171 @@
 
     <!-- FATHER'S NAME -->
     <div class="group">
-      <div class="group-title"><h3>Father's Name</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="fatherToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Father's Name</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="fatherToggle" @if(isset($designcard->layout['fields']['father'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="fatherText" value="Father: Rakesh Sharma"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="fatherX" value="230"></div>
-          <div class="field"><label>Y</label><input type="number" id="fatherY" value="378"></div>
-          <div class="field"><label>Size</label><input type="number" id="fatherSize" value="15"></div>
+          <div class="field"><label>X</label><input type="number" id="fatherX" value="@php echo $designcard->layout['fields']['father']['x'] ?? 230; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="fatherY" value="@php echo $designcard->layout['fields']['father']['y'] ?? 378; @endphp"></div>
+          <div class="field"><label>Size</label><input type="number" id="fatherSize" value="@php echo $designcard->layout['fields']['father']['size'] ?? 15; @endphp"></div>
         </div>
-        <div class="field"><label>Color</label><input type="color" id="fatherColor" value="#1f2430"></div>
+        <div class="row2">
+           <div class="field"><label>Color</label><input type="color" id="fatherColor" value="#1f2430"></div>
+            <div class="field"><label>Weight</label>
+              <select id="fatherWeight">
+                <option value="700" selected>Bold</option>
+                <option value="400">Normal</option>
+              </select>
+            </div>
+        </div>
       </div>
     </div>
 
     <!-- MOTHER'S NAME -->
     <div class="group">
-      <div class="group-title"><h3>Mother's Name</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="motherToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Mother's Name</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="motherToggle" @if(isset($designcard->layout['fields']['mother'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="motherText" value="Mother: Anita Sharma"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="motherX" value="230"></div>
-          <div class="field"><label>Y</label><input type="number" id="motherY" value="403"></div>
-          <div class="field"><label>Size</label><input type="number" id="motherSize" value="15"></div>
+          <div class="field"><label>X</label><input type="number" id="motherX" value="@php echo $designcard->layout['fields']['mother']['x'] ?? 230; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="motherY" value="@php echo $designcard->layout['fields']['mother']['y'] ?? 403; @endphp"></div>
+          <div class="field"><label>Size</label><input type="number" id="motherSize" value="@php echo $designcard->layout['fields']['mother']['size'] ?? 15; @endphp"></div>
         </div>
-        <div class="field"><label>Color</label><input type="color" id="motherColor" value="#1f2430"></div>
+        <div class="row2">
+           <div class="field"><label>Color</label><input type="color" id="motherColor" value="#1f2430"></div>
+            <div class="field"><label>Weight</label>
+              <select id="motherWeight">
+                <option value="700" selected>Bold</option>
+                <option value="400">Normal</option>
+              </select>
+            </div>
+        </div>
       </div>
     </div>
 
     <!-- CLASS -->
     <div class="group">
-      <div class="group-title"><h3>Class &amp; Section</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="classToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Class &amp; Section</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="classToggle" @if(isset($designcard->layout['fields']['class'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="classText" value="Class: V - B"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="classX" value="230"></div>
-          <div class="field"><label>Y</label><input type="number" id="classY" value="428"></div>
-          <div class="field"><label>Size</label><input type="number" id="classSize" value="15"></div>
+          <div class="field"><label>X</label><input type="number" id="classX" value="@php echo $designcard->layout['fields']['class']['x'] ?? 230; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="classY" value="@php echo $designcard->layout['fields']['class']['y'] ?? 428; @endphp"></div>
+          <div class="field"><label>Size</label><input type="number" id="classSize" value="@php echo $designcard->layout['fields']['class']['size'] ?? 15; @endphp"></div>
         </div>
-        <div class="field"><label>Color</label><input type="color" id="classColor" value="#1f2430"></div>
+        <div class="row2">
+          <div class="field"><label>Color</label><input type="color" id="classColor" value="#1f2430"></div>
+          <div class="field"><label>Weight</label>
+            <select id="classWeight">
+              <option value="700" selected>Bold</option>
+              <option value="400">Normal</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- DOB -->
     <div class="group">
-      <div class="group-title"><h3>Date of Birth</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="dobToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Date of Birth</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="dobToggle" @if(isset($designcard->layout['fields']['dob'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="dobText" value="DOB: 12-05-2015"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="dobX" value="230"></div>
-          <div class="field"><label>Y</label><input type="number" id="dobY" value="453"></div>
-          <div class="field"><label>Size</label><input type="number" id="dobSize" value="15"></div>
+          <div class="field"><label>X</label><input type="number" id="dobX" value="@php echo $designcard->layout['fields']['dob']['x'] ?? 230; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="dobY" value="@php echo $designcard->layout['fields']['dob']['y'] ?? 453; @endphp"></div>
+          <div class="field"><label>Size</label><input type="number" id="dobSize" value="@php echo $designcard->layout['fields']['dob']['size'] ?? 15; @endphp"></div>
         </div>
-        <div class="field"><label>Color</label><input type="color" id="dobColor" value="#1f2430"></div>
+        <div class="row2">
+          <div class="field"><label>Color</label><input type="color" id="dobColor" value="#1f2430"></div>
+          <div class="field"><label>Weight</label>
+            <select id="dobWeight">
+              <option value="700" selected>Bold</option>
+              <option value="400">Normal</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- ADMISSION / ROLL NO -->
     <div class="group">
-      <div class="group-title"><h3>Admission / Roll No</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="admToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Admission / Roll No</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="admToggle" @if(isset($designcard->layout['fields']['adm'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="admText" value="Adm No: MP-2026-0143"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="admX" value="230"></div>
-          <div class="field"><label>Y</label><input type="number" id="admY" value="478"></div>
-          <div class="field"><label>Size</label><input type="number" id="admSize" value="15"></div>
+          <div class="field"><label>X</label><input type="number" id="admX" value="@php echo $designcard->layout['fields']['adm']['x'] ?? 230; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="admY" value="@php echo $designcard->layout['fields']['adm']['y'] ?? 478; @endphp"></div>
+          <div class="field"><label>Size</label><input type="number" id="admSize" value="@php echo $designcard->layout['fields']['adm']['size'] ?? 15; @endphp"></div>
         </div>
-        <div class="field"><label>Color</label><input type="color" id="admColor" value="#1f2430"></div>
+        <div class="row2">
+          <div class="field"><label>Color</label><input type="color" id="admColor" value="#1f2430"></div>
+          <div class="field"><label>Weight</label>
+            <select id="admWeight">
+              <option value="700" selected>Bold</option>
+              <option value="400">Normal</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- BLOOD GROUP / CONTACT -->
     <div class="group">
-      <div class="group-title"><h3>Blood Group / Contact</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="bloodToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Blood Group / Contact</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="bloodToggle" @if(isset($designcard->layout['fields']['blood'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Text</label><input type="text" id="bloodText" value="Blood Group: O+  |  Ph: 98765 43210"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="bloodX" value="55"></div>
-          <div class="field"><label>Y</label><input type="number" id="bloodY" value="817"></div>
-          <div class="field"><label>Size</label><input type="number" id="bloodSize" value="13"></div>
+          <div class="field"><label>X</label><input type="number" id="bloodX" value="@php echo $designcard->layout['fields']['blood']['x'] ?? 55; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="bloodY" value="@php echo $designcard->layout['fields']['blood']['y'] ?? 817; @endphp"></div>
+          <div class="field"><label>Size</label><input type="number" id="bloodSize" value="@php echo $designcard->layout['fields']['blood']['size'] ?? 13; @endphp"></div>
         </div>
-        <div class="field"><label>Color</label><input type="color" id="bloodColor" value="#ffffff"></div>
+        <div class="row2">
+          <div class="field"><label>Color</label><input type="color" id="bloodColor" value="#ffffff"></div>
+          <div class="field"><label>Weight</label>
+            <select id="bloodWeight">
+              <option value="700" selected>Bold</option>
+              <option value="400">Normal</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- PRINCIPAL SIGNATURE -->
     <div class="group">
-      <div class="group-title"><h3>Principal Signature</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="signToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>Principal Signature</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="signToggle" @if(isset($designcard->layout['fields']['sign'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <label class="filebtn">Click to upload signature
           <input type="file" id="signUpload" accept="image/*">
         </label>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="signX" value="1150"></div>
-          <div class="field"><label>Y</label><input type="number" id="signY" value="790"></div>
-          <div class="field"><label>W</label><input type="number" id="signW" value="180"></div>
-          <div class="field"><label>H</label><input type="number" id="signH" value="60"></div>
+          <div class="field"><label>X</label><input type="number" id="signX" value="@php echo $designcard->layout['fields']['sign']['x'] ?? 1150; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="signY" value="@php echo $designcard->layout['fields']['sign']['y'] ?? 790; @endphp"></div>
+          <div class="field"><label>W</label><input type="number" id="signW" value="@php echo $designcard->layout['fields']['sign']['width'] ?? 180; @endphp"></div>
+          <div class="field"><label>H</label><input type="number" id="signH" value="@php echo $designcard->layout['fields']['sign']['height'] ?? 60; @endphp"></div>
         </div>
         <div style="font-size:11px;color:var(--muted);">Tip: use a signature saved with a transparent background for best results.</div>
+        <div class="row2">
+          <div class="field"><label>Color</label><input type="color" id="signColor" value="#ffffff"></div>
+          <div class="field"><label>Weight</label>
+            <select id="signWeight">
+              <option value="700" selected>Bold</option>
+              <option value="400">Normal</option>
+            </select>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- QR CODE -->
     <div class="group">
-      <div class="group-title"><h3>QR Code</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="qrToggle" checked><span class="slider"></span></label><span class="chev">▾</span></div></div>
+      <div class="group-title"><h3>QR Code</h3><div class="group-title-right"><label class="switch" onclick="event.stopPropagation()"><input type="checkbox" id="qrToggle" @if(isset($designcard->layout['fields']['qr'])) checked @endif><span class="slider"></span></label><span class="chev">▾</span></div></div>
       <div class="group-body">
         <div class="field"><label>Data (usually admission no.)</label><input type="text" id="qrData" value="MP-2026-0143"></div>
         <div class="row4">
-          <div class="field"><label>X</label><input type="number" id="qrX" value="600"></div>
-          <div class="field"><label>Y</label><input type="number" id="qrY" value="800"></div>
-          <div class="field"><label>Size</label><input type="number" id="qrSize" value="80"></div>
+          <div class="field"><label>X</label><input type="number" id="qrX" value="@php echo $designcard->layout['fields']['qr']['x'] ?? 600; @endphp"></div>
+          <div class="field"><label>Y</label><input type="number" id="qrY" value="@php echo $designcard->layout['fields']['qr']['y'] ?? 800; @endphp"></div>
+          <div class="field"><label>Size</label><input type="number" id="qrSize" value="@php echo $designcard->layout['fields']['qr']['width'] ?? 80; @endphp"></div>
         </div>
       </div>
     </div>
@@ -623,381 +713,1707 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-(function(){
-  const card = document.getElementById('idCard');
-  const MAX_W = 750, MAX_H = 560; // display bounding box in the editor
-  let CARD_W = 700, CARD_H = 450;
+(function () {
 
-  function setCardSize(naturalW, naturalH){
-    const scale = Math.min(MAX_W / naturalW, MAX_H / naturalH, 1.5);
-    CARD_W = Math.round(naturalW * scale);
-    CARD_H = Math.round(naturalH * scale);
-    card.style.width = CARD_W + 'px';
-    card.style.height = CARD_H + 'px';
-  }
-  // the bundled default background is 1400x900 (landscape)
-  setCardSize(1400, 900);
+    // =========================================================
+    // BASIC CARD VARIABLES
+    // =========================================================
 
-  // ---- EXIF-aware image loading ----
-  // Phone photos often store pixels in landscape order and rely on an EXIF
-  // "orientation" tag to display upright/portrait. Reading naturalWidth/
-  // naturalHeight directly ignores that tag, so a genuinely vertical photo
-  // can get treated as landscape. We read the tag ourselves and bake the
-  // correct rotation into a canvas, so sizing and display always match
-  // what the photo actually looks like.
-  function readExifOrientation(arrayBuffer){
-    const view = new DataView(arrayBuffer);
-    if(view.byteLength < 4 || view.getUint16(0,false) !== 0xFFD8) return 1;
-    let offset = 2;
-    while(offset < view.byteLength - 1){
-      const marker = view.getUint16(offset, false);
-      offset += 2;
-      if(marker === 0xFFE1){
-        if(view.getUint32(offset+2,false) !== 0x45786966) return 1; // "Exif"
-        const tiffOffset = offset+8;
-        const little = view.getUint16(tiffOffset,false) === 0x4949;
-        const firstIFDOffset = view.getUint32(tiffOffset+4, little);
-        const dirStart = tiffOffset + firstIFDOffset;
-        const entries = view.getUint16(dirStart, little);
-        for(let i=0;i<entries;i++){
-          const entryOffset = dirStart + 2 + i*12;
-          if(view.getUint16(entryOffset, little) === 0x0112){
-            return view.getUint16(entryOffset+8, little);
-          }
+    const card = document.getElementById('idCard');
+
+    const MAX_W = 750;
+    const MAX_H = 560;
+
+    let CARD_W = 700;
+    let CARD_H = 450;
+
+
+    // =========================================================
+    // SET CARD SIZE
+    // =========================================================
+
+    function setCardSize(naturalW, naturalH) {
+
+        const scale = Math.min(
+            MAX_W / naturalW,
+            MAX_H / naturalH,
+            1.5
+        );
+
+        CARD_W = Math.round(naturalW * scale);
+        CARD_H = Math.round(naturalH * scale);
+
+        card.style.width = CARD_W + 'px';
+        card.style.height = CARD_H + 'px';
+    }
+
+
+    // Default card size
+    setCardSize(1400, 900);
+
+
+    // =========================================================
+    // EXIF ORIENTATION
+    // =========================================================
+
+    function readExifOrientation(arrayBuffer) {
+
+        const view = new DataView(arrayBuffer);
+
+        if (
+            view.byteLength < 4 ||
+            view.getUint16(0, false) !== 0xFFD8
+        ) {
+            return 1;
         }
+
+        let offset = 2;
+
+        while (offset < view.byteLength - 1) {
+
+            const marker = view.getUint16(offset, false);
+
+            offset += 2;
+
+            if (marker === 0xFFE1) {
+
+                if (
+                    view.getUint32(offset + 2, false) !== 0x45786966
+                ) {
+                    return 1;
+                }
+
+                const tiffOffset = offset + 8;
+
+                const little =
+                    view.getUint16(tiffOffset, false) === 0x4949;
+
+                const firstIFDOffset =
+                    view.getUint32(tiffOffset + 4, little);
+
+                const dirStart =
+                    tiffOffset + firstIFDOffset;
+
+                const entries =
+                    view.getUint16(dirStart, little);
+
+                for (let i = 0; i < entries; i++) {
+
+                    const entryOffset =
+                        dirStart + 2 + i * 12;
+
+                    if (
+                        view.getUint16(entryOffset, little) === 0x0112
+                    ) {
+
+                        return view.getUint16(
+                            entryOffset + 8,
+                            little
+                        );
+                    }
+                }
+
+                return 1;
+
+            } else if (
+                (marker & 0xFF00) !== 0xFF00
+            ) {
+
+                break;
+
+            } else {
+
+                offset += view.getUint16(offset, false);
+            }
+        }
+
         return 1;
-      } else if((marker & 0xFF00) !== 0xFF00){
-        break;
-      } else {
-        offset += view.getUint16(offset, false);
-      }
     }
-    return 1;
-  }
 
-  function normalizeImage(file, callback){
-    const reader = new FileReader();
-    reader.onload = function(e){
-      const arrayBuffer = e.target.result;
-      let orientation = 1;
-      try{ orientation = readExifOrientation(arrayBuffer); }catch(err){ orientation = 1; }
-      const url = URL.createObjectURL(new Blob([arrayBuffer]));
-      const img = new Image();
-      img.onload = function(){
-        const w = img.naturalWidth, h = img.naturalHeight;
-        const canvas = document.createElement('canvas');
-        const rotated = orientation >= 5 && orientation <= 8;
-        canvas.width = rotated ? h : w;
-        canvas.height = rotated ? w : h;
-        const ctx = canvas.getContext('2d');
-        switch(orientation){
-          case 2: ctx.transform(-1,0,0,1,w,0); break;
-          case 3: ctx.transform(-1,0,0,-1,w,h); break;
-          case 4: ctx.transform(1,0,0,-1,0,h); break;
-          case 5: ctx.transform(0,1,1,0,0,0); break;
-          case 6: ctx.transform(0,1,-1,0,h,0); break;
-          case 7: ctx.transform(0,-1,-1,0,h,w); break;
-          case 8: ctx.transform(0,-1,1,0,0,w); break;
-          default: break;
+
+    // =========================================================
+    // NORMALIZE IMAGE
+    // =========================================================
+
+    function normalizeImage(file, callback) {
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+
+            const arrayBuffer = e.target.result;
+
+            let orientation = 1;
+
+            try {
+
+                orientation =
+                    readExifOrientation(arrayBuffer);
+
+            } catch (error) {
+
+                orientation = 1;
+            }
+
+            const url =
+                URL.createObjectURL(
+                    new Blob([arrayBuffer])
+                );
+
+            const img = new Image();
+
+            img.onload = function () {
+
+                const w = img.naturalWidth;
+                const h = img.naturalHeight;
+
+                const canvas =
+                    document.createElement('canvas');
+
+                const rotated =
+                    orientation >= 5 &&
+                    orientation <= 8;
+
+                canvas.width =
+                    rotated ? h : w;
+
+                canvas.height =
+                    rotated ? w : h;
+
+                const ctx =
+                    canvas.getContext('2d');
+
+                switch (orientation) {
+
+                    case 2:
+                        ctx.transform(
+                            -1, 0, 0, 1, w, 0
+                        );
+                        break;
+
+                    case 3:
+                        ctx.transform(
+                            -1, 0, 0, -1, w, h
+                        );
+                        break;
+
+                    case 4:
+                        ctx.transform(
+                            1, 0, 0, -1, 0, h
+                        );
+                        break;
+
+                    case 5:
+                        ctx.transform(
+                            0, 1, 1, 0, 0, 0
+                        );
+                        break;
+
+                    case 6:
+                        ctx.transform(
+                            0, 1, -1, 0, h, 0
+                        );
+                        break;
+
+                    case 7:
+                        ctx.transform(
+                            0, -1, -1, 0, h, w
+                        );
+                        break;
+
+                    case 8:
+                        ctx.transform(
+                            0, -1, 1, 0, 0, w
+                        );
+                        break;
+                }
+
+                ctx.drawImage(img, 0, 0);
+
+                URL.revokeObjectURL(url);
+
+                callback(
+                    canvas.toDataURL('image/jpeg', 0.92),
+                    canvas.width,
+                    canvas.height
+                );
+            };
+
+            img.src = url;
+        };
+
+        reader.readAsArrayBuffer(file);
+    }
+
+
+    // =========================================================
+    // BACKGROUND UPLOAD
+    // =========================================================
+
+    const bgUpload =
+        document.getElementById('bgUpload');
+
+    if (bgUpload) {
+
+        bgUpload.addEventListener(
+            'change',
+            function (e) {
+
+                const file =
+                    e.target.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                normalizeImage(
+                    file,
+                    function (dataUrl, w, h) {
+
+                        setCardSize(w, h);
+
+                        card.style.backgroundImage =
+                            'url("' + dataUrl + '")';
+                    }
+                );
+            }
+        );
+    }
+
+
+    // =========================================================
+    // FIELD CONFIGURATION
+    // =========================================================
+
+    const fields = [
+
+        {
+            key: 'logo',
+            el: 'elLogo',
+            x: 'logoX',
+            y: 'logoY',
+            w: 'logoW',
+            h: 'logoH',
+            toggle: 'logoToggle'
+        },
+
+        {
+            key: 'schoolName',
+            el: 'elSchoolName',
+            x: 'schoolNameX',
+            y: 'schoolNameY',
+            text: 'schoolNameText',
+            size: 'schoolNameSize',
+            color: 'schoolNameColor',
+            weight: 'schoolNameWeight',
+            toggle: 'schoolNameToggle'
+        },
+
+        {
+            key: 'address',
+            el: 'elAddress',
+            x: 'addressX',
+            y: 'addressY',
+            text: 'addressText',
+            size: 'addressSize',
+            color: 'addressColor',
+            weight: 'addressWeight',
+            toggle: 'addressToggle'
+        },
+
+        {
+            key: 'session',
+            el: 'elSession',
+            x: 'sessionX',
+            y: 'sessionY',
+            text: 'sessionText',
+            size: 'sessionSize',
+            color: 'sessionColor',
+            weight: 'sessionWeight',
+            toggle: 'sessionToggle'
+        },
+
+        {
+            key: 'photo',
+            el: 'elPhoto',
+            x: 'photoX',
+            y: 'photoY',
+            w: 'photoW',
+            h: 'photoH',
+            toggle: 'photoToggle'
+        },
+
+        {
+            key: 'name',
+            el: 'elName',
+            x: 'nameX',
+            y: 'nameY',
+            text: 'nameText',
+            size: 'nameSize',
+            color: 'nameColor',
+            weight: 'nameWeight',
+            toggle: 'nameToggle'
+        },
+
+        {
+            key: 'father',
+            el: 'elFather',
+            x: 'fatherX',
+            y: 'fatherY',
+            text: 'fatherText',
+            size: 'fatherSize',
+            color: 'fatherColor',
+            weight: 'fatherWeight',
+            toggle: 'fatherToggle'
+        },
+
+        {
+            key: 'mother',
+            el: 'elMother',
+            x: 'motherX',
+            y: 'motherY',
+            text: 'motherText',
+            size: 'motherSize',
+            color: 'motherColor',
+            weight: 'motherWeight',
+            toggle: 'motherToggle'
+        },
+
+        {
+            key: 'class',
+            el: 'elClass',
+            x: 'classX',
+            y: 'classY',
+            text: 'classText',
+            size: 'classSize',
+            color: 'classColor',
+            weight: 'classWeight',
+            toggle: 'classToggle'
+        },
+
+        {
+            key: 'dob',
+            el: 'elDob',
+            x: 'dobX',
+            y: 'dobY',
+            text: 'dobText',
+            size: 'dobSize',
+            color: 'dobColor',
+            weight: 'dobWeight',
+            toggle: 'dobToggle'
+        },
+
+        {
+            key: 'adm',
+            el: 'elAdm',
+            x: 'admX',
+            y: 'admY',
+            text: 'admText',
+            size: 'admSize',
+            color: 'admColor',
+            weight: 'admWeight',
+            toggle: 'admToggle'
+        },
+
+        {
+            key: 'blood',
+            el: 'elBlood',
+            x: 'bloodX',
+            y: 'bloodY',
+            text: 'bloodText',
+            size: 'bloodSize',
+            color: 'bloodColor',
+            weight: 'bloodWeight',
+            toggle: 'bloodToggle'
+        },
+
+        {
+            key: 'sign',
+            el: 'elSign',
+            x: 'signX',
+            y: 'signY',
+            w: 'signW',
+            h: 'signH',
+            color: 'signColor',
+            weight: 'signWeight',
+            toggle: 'signToggle'
+        },
+
+        {
+            key: 'qr',
+            el: 'elQr',
+            x: 'qrX',
+            y: 'qrY',
+            w: 'qrSize',
+            h: 'qrSize',
+            toggle: 'qrToggle'
         }
-        ctx.drawImage(img, 0, 0);
-        URL.revokeObjectURL(url);
-        callback(canvas.toDataURL('image/jpeg', 0.92), canvas.width, canvas.height);
-      };
-      img.src = url;
-    };
-    reader.readAsArrayBuffer(file);
-  }
 
-  document.getElementById('bgUpload').addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    normalizeImage(file, (dataUrl, w, h) => {
-      setCardSize(w, h);
-      card.style.backgroundImage = 'url(' + dataUrl + ')';
-    });
-  });
+    ];
 
-  // ---- field config: maps control ids to element + style props ----
-  const fields = [
-    { key:'logo',   el:'elLogo',   x:'logoX',   y:'logoY',   w:'logoW',   h:'logoH', toggle:'logoToggle' },
-    { key:'schoolName', el:'elSchoolName', x:'schoolNameX', y:'schoolNameY', text:'schoolNameText', size:'schoolNameSize', color:'schoolNameColor', weight:'schoolNameWeight', toggle:'schoolNameToggle' },
-    { key:'address', el:'elAddress', x:'addressX', y:'addressY', text:'addressText', size:'addressSize', color:'addressColor', toggle:'addressToggle' },
-    { key:'session', el:'elSession', x:'sessionX', y:'sessionY', text:'sessionText', size:'sessionSize', color:'sessionColor', toggle:'sessionToggle' },
-    { key:'photo',  el:'elPhoto', x:'photoX', y:'photoY', w:'photoW', h:'photoH', toggle:'photoToggle' },
-    { key:'name',   el:'elName',   x:'nameX',   y:'nameY',   text:'nameText',   size:'nameSize',   color:'nameColor',   weight:'nameWeight', toggle:'nameToggle' },
-    { key:'father', el:'elFather', x:'fatherX', y:'fatherY', text:'fatherText', size:'fatherSize', color:'fatherColor', toggle:'fatherToggle' },
-    { key:'mother', el:'elMother', x:'motherX', y:'motherY', text:'motherText', size:'motherSize', color:'motherColor', toggle:'motherToggle' },
-    { key:'class',  el:'elClass',  x:'classX',  y:'classY',  text:'classText',  size:'classSize',  color:'classColor', toggle:'classToggle' },
-    { key:'dob',    el:'elDob',    x:'dobX',    y:'dobY',    text:'dobText',    size:'dobSize',    color:'dobColor', toggle:'dobToggle' },
-    { key:'adm',    el:'elAdm',    x:'admX',    y:'admY',    text:'admText',    size:'admSize',    color:'admColor', toggle:'admToggle' },
-    { key:'blood',  el:'elBlood',  x:'bloodX',  y:'bloodY',  text:'bloodText',  size:'bloodSize',  color:'bloodColor', toggle:'bloodToggle' },
-    { key:'sign',   el:'elSign',   x:'signX',   y:'signY',   w:'signW',   h:'signH', toggle:'signToggle' },
-    { key:'qr',     el:'elQr',     x:'qrX',     y:'qrY',     w:'qrSize',        h:'qrSize', toggle:'qrToggle' },
-  ];
 
-  function applyField(f){
-    const el = document.getElementById(f.el);
-    if(!el) return;
-    if(f.x) el.style.left = (document.getElementById(f.x).value||0) + 'px';
-    if(f.y) el.style.top  = (document.getElementById(f.y).value||0) + 'px';
-    if(f.w) el.style.width  = (document.getElementById(f.w).value||0) + 'px';
-    if(f.h) el.style.height = (document.getElementById(f.h).value||0) + 'px';
-    if(f.text) el.textContent = document.getElementById(f.text).value;
-    if(f.size) el.style.fontSize = (document.getElementById(f.size).value||12) + 'px';
-    if(f.color) el.style.color = document.getElementById(f.color).value;
-    if(f.weight) el.style.fontWeight = document.getElementById(f.weight).value;
-    if(f.toggle){
-      const on = document.getElementById(f.toggle).checked;
-      el.style.display = on ? '' : 'none';
-      const group = document.getElementById(f.toggle).closest('.group');
-      if(group) group.classList.toggle('field-off', !on);
-    }
-  }
+    // =========================================================
+    // APPLY FIELD
+    // =========================================================
 
-  function wireField(f){
-    ['x','y','w','h','text','size','color','weight','toggle'].forEach(k=>{
-      if(f[k]){
-        const evt = k === 'toggle' ? 'change' : 'input';
-        document.getElementById(f[k]).addEventListener(evt, ()=>applyField(f));
-      }
-    });
-    applyField(f);
-  }
+    function applyField(f) {
 
-  fields.forEach(wireField);
+        const el =
+            document.getElementById(f.el);
 
-  // ---- show all / hide all ----
-  document.getElementById('showAllBtn').addEventListener('click', ()=>{
-    fields.forEach(f=>{
-      if(f.toggle){
-        document.getElementById(f.toggle).checked = true;
-        applyField(f);
-      }
-    });
-  });
-  document.getElementById('hideAllBtn').addEventListener('click', ()=>{
-    fields.forEach(f=>{
-      if(f.toggle){
-        document.getElementById(f.toggle).checked = false;
-        applyField(f);
-      }
-    });
-  });
-
-  // font weight default bold for name / school name
-  document.getElementById('elName').style.fontWeight = '700';
-  document.getElementById('elName').style.textTransform = 'uppercase';
-  document.getElementById('elSchoolName').style.fontWeight = '700';
-
-  // ---- QR data -> rebuild qr image ----
-  const qrDataInput = document.getElementById('qrData');
-  function updateQr(){
-    const val = encodeURIComponent(qrDataInput.value || '');
-    document.getElementById('elQr').src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + val;
-  }
-  qrDataInput.addEventListener('input', updateQr);
-
-  // keep admission-no text and qr data in sync by default (user can still edit independently)
-  document.getElementById('admText').addEventListener('input', function(){
-    // no forced sync, kept independent intentionally
-  });
-
-  // ---- photo upload ----
-  document.getElementById('photoUpload').addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    normalizeImage(file, (dataUrl) => {
-      document.getElementById('elPhoto').src = dataUrl;
-    });
-  });
-
-  // ---- school logo upload ----
-  document.getElementById('logoUpload').addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    normalizeImage(file, (dataUrl) => {
-      document.getElementById('elLogo').src = dataUrl;
-    });
-  });
-
-  // ---- principal signature upload ----
-  document.getElementById('signUpload').addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    normalizeImage(file, (dataUrl) => {
-      document.getElementById('elSign').src = dataUrl;
-    });
-  });
-
-  // ---- draggable elements ----
-  let dragEl = null, offX = 0, offY = 0;
-
-  function xyControlsFor(elId){
-    return fields.find(f => f.el === elId);
-  }
-
-  document.querySelectorAll('.el').forEach(el=>{
-    el.addEventListener('mousedown', function(e){
-      dragEl = el;
-      el.classList.add('dragging');
-      const rect = card.getBoundingClientRect();
-      const scale = rect.width / CARD_W;
-      offX = (e.clientX - rect.left)/scale - parseFloat(el.style.left||0);
-      offY = (e.clientY - rect.top)/scale - parseFloat(el.style.top||0);
-      e.preventDefault();
-    });
-  });
-
-  document.addEventListener('mousemove', function(e){
-    if(!dragEl) return;
-    const rect = card.getBoundingClientRect();
-    const scale = rect.width / CARD_W;
-    let nx = Math.round((e.clientX - rect.left)/scale - offX);
-    let ny = Math.round((e.clientY - rect.top)/scale - offY);
-    nx = Math.max(0, Math.min(CARD_W, nx));
-    ny = Math.max(0, Math.min(CARD_H, ny));
-    dragEl.style.left = nx + 'px';
-    dragEl.style.top = ny + 'px';
-    const f = xyControlsFor(dragEl.id);
-    if(f){
-      if(f.x) document.getElementById(f.x).value = nx;
-      if(f.y) document.getElementById(f.y).value = ny;
-    }
-  });
-
-  document.addEventListener('mouseup', function(){
-    if(dragEl) dragEl.classList.remove('dragging');
-    dragEl = null;
-  });
-
-  // ---- collapsible groups ----
-  document.querySelectorAll('.group-title').forEach(t=>{
-    t.addEventListener('click', ()=> t.parentElement.classList.toggle('collapsed'));
-  });
-
-  // ---- zoom ----
-  const zoom = document.getElementById('zoom');
-  const zoomVal = document.getElementById('zoomVal');
-  zoom.addEventListener('input', ()=>{
-    const s = zoom.value/100;
-    card.style.transform = 'scale(' + s + ')';
-    zoomVal.textContent = zoom.value + '%';
-  });
-
-  // ---- reset ----
-  const defaults = {};
-  document.querySelectorAll('.controls input, .controls select').forEach(inp=>{
-    defaults[inp.id] = inp.type === 'checkbox' ? inp.checked : inp.value;
-  });
-  document.getElementById('resetBtn').addEventListener('click', ()=>{
-    Object.keys(defaults).forEach(id=>{
-      const inp = document.getElementById(id);
-      if(inp.type === 'checkbox') inp.checked = defaults[id];
-      else inp.value = defaults[id];
-    });
-    fields.forEach(applyField);
-    updateQr();
-  });
-
-  // ---- export / import layout ----
-  // The layout JSON captures every field's position/style plus the card
-  // background, so it's a complete, portable "design" that a bulk-print
-  // tool (or your backend) can apply to any number of student records.
-  function buildLayoutJSON(){
-    const bg = getComputedStyle(card).backgroundImage; // url("data:image/jpeg;base64,...")
-    const layout = {
-      cardWidth: CARD_W,
-      cardHeight: CARD_H,
-      background: bg.slice(5, -2), // strip url(" ... ")
-      fields: {}
-    };
-    fields.forEach(f=>{
-      const el = document.getElementById(f.el);
-      layout.fields[f.key] = {
-        x: parseFloat(el.style.left)||0,
-        y: parseFloat(el.style.top)||0,
-        width: f.w ? (parseFloat(el.style.width)||0) : undefined,
-        height: f.h ? (parseFloat(el.style.height)||0) : undefined,
-        fontSize: f.size ? (parseFloat(el.style.fontSize)||undefined) : undefined,
-        color: f.color ? el.style.color : undefined,
-        fontWeight: f.weight ? el.style.fontWeight : undefined,
-        visible: f.toggle ? document.getElementById(f.toggle).checked : true,
-      };
-    });
-    return layout;
-  }
-
-  document.getElementById('exportLayoutBtn').addEventListener('click', ()=>{
-    const layout = buildLayoutJSON();
-    const blob = new Blob([JSON.stringify(layout, null, 2)], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'idcard-layout.json';
-    a.click();
-  });
-
-  document.getElementById('importLayoutBtn').addEventListener('click', ()=>{
-    document.getElementById('importLayoutFile').click();
-  });
-
-  document.getElementById('importLayoutFile').addEventListener('change', function(e){
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = evt => {
-      try{
-        const layout = JSON.parse(evt.target.result);
-        if(layout.background){
-          card.style.backgroundImage = 'url(' + layout.background + ')';
+        if (!el) {
+            return;
         }
-        fields.forEach(f=>{
-          const data = layout.fields && layout.fields[f.key];
-          if(!data) return;
-          if(f.x) document.getElementById(f.x).value = data.x ?? 0;
-          if(f.y) document.getElementById(f.y).value = data.y ?? 0;
-          if(f.w && data.width!=null) document.getElementById(f.w).value = data.width;
-          if(f.h && data.height!=null) document.getElementById(f.h).value = data.height;
-          if(f.size && data.fontSize!=null) document.getElementById(f.size).value = data.fontSize;
-          if(f.color && data.color) document.getElementById(f.color).value = rgbToHex(data.color);
-          if(f.toggle && data.visible!=null) document.getElementById(f.toggle).checked = data.visible;
-          applyField(f);
+
+
+        // X
+        if (f.x) {
+
+            const input =
+                document.getElementById(f.x);
+
+            if (input) {
+
+                el.style.left =
+                    (input.value || 0) + 'px';
+            }
+        }
+
+
+        // Y
+        if (f.y) {
+
+            const input =
+                document.getElementById(f.y);
+
+            if (input) {
+
+                el.style.top =
+                    (input.value || 0) + 'px';
+            }
+        }
+
+
+        // WIDTH
+        if (f.w) {
+
+            const input =
+                document.getElementById(f.w);
+
+            if (input) {
+
+                el.style.width =
+                    (input.value || 0) + 'px';
+            }
+        }
+
+
+        // HEIGHT
+        if (f.h) {
+
+            const input =
+                document.getElementById(f.h);
+
+            if (input) {
+
+                el.style.height =
+                    (input.value || 0) + 'px';
+            }
+        }
+
+
+        // TEXT
+        if (f.text) {
+
+            const input =
+                document.getElementById(f.text);
+
+            if (input) {
+
+                el.textContent =
+                    input.value;
+            }
+        }
+
+
+        // FONT SIZE
+        if (f.size) {
+
+            const input =
+                document.getElementById(f.size);
+
+            if (input) {
+
+                el.style.fontSize =
+                    (input.value || 12) + 'px';
+            }
+        }
+
+
+        // COLOR
+        if (f.color) {
+
+            const input =
+                document.getElementById(f.color);
+
+            if (input) {
+
+                el.style.color =
+                    input.value;
+            }
+        }
+
+
+        // FONT WEIGHT
+        if (f.weight) {
+
+            const input =
+                document.getElementById(f.weight);
+
+            if (input) {
+
+                el.style.fontWeight =
+                    input.value;
+            }
+        }
+
+
+        // VISIBILITY
+        if (f.toggle) {
+
+            const toggle =
+                document.getElementById(f.toggle);
+
+            if (toggle) {
+
+                const visible =
+                    toggle.checked;
+
+                el.style.display =
+                    visible ? '' : 'none';
+
+                const group =
+                    toggle.closest('.group');
+
+                if (group) {
+
+                    group.classList.toggle(
+                        'field-off',
+                        !visible
+                    );
+                }
+            }
+        }
+    }
+
+
+    // =========================================================
+    // CONNECT CONTROLS
+    // =========================================================
+
+    function wireField(f) {
+
+        [
+            'x',
+            'y',
+            'w',
+            'h',
+            'text',
+            'size',
+            'color',
+            'weight',
+            'toggle'
+
+        ].forEach(function (key) {
+
+            if (!f[key]) {
+                return;
+            }
+
+            const input =
+                document.getElementById(f[key]);
+
+            if (!input) {
+                return;
+            }
+
+            const event =
+                key === 'toggle'
+                    ? 'change'
+                    : 'input';
+
+            input.addEventListener(
+                event,
+                function () {
+
+                    applyField(f);
+                }
+            );
         });
-        alert('Layout loaded.');
-      }catch(err){
-        alert('Could not read that layout file.');
-        console.error(err);
-      }
-    };
-    reader.readAsText(file);
-  });
 
-  function rgbToHex(rgb){
-    if(rgb.startsWith('#')) return rgb;
-    const m = rgb.match(/\d+/g);
-    if(!m) return '#000000';
-    return '#' + m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');
-  }
+        applyField(f);
+    }
 
-  // ---- download as PNG ----
-  document.getElementById('downloadBtn').addEventListener('click', ()=>{
-    const prevTransform = card.style.transform;
-    card.style.transform = 'none';
-    html2canvas(card, { scale: 3, useCORS: true, backgroundColor: null }).then(canvas=>{
-      card.style.transform = prevTransform;
-      const link = document.createElement('a');
-      link.download = 'id-card.png';
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    }).catch(err=>{
-      card.style.transform = prevTransform;
-      alert('Could not export image (this can happen if the browser blocks the QR image due to CORS). Try again or take a screenshot instead.');
-      console.error(err);
+
+    fields.forEach(function (f) {
+
+        wireField(f);
+
     });
-  });
+
+
+    // =========================================================
+    // SHOW ALL
+    // =========================================================
+
+    const showAllBtn =
+        document.getElementById('showAllBtn');
+
+    if (showAllBtn) {
+
+        showAllBtn.addEventListener(
+            'click',
+            function () {
+
+                fields.forEach(function (f) {
+
+                    if (!f.toggle) {
+                        return;
+                    }
+
+                    const toggle =
+                        document.getElementById(
+                            f.toggle
+                        );
+
+                    toggle.checked = true;
+
+                    applyField(f);
+                });
+            }
+        );
+    }
+
+
+    // =========================================================
+    // HIDE ALL
+    // =========================================================
+
+    const hideAllBtn =
+        document.getElementById('hideAllBtn');
+
+    if (hideAllBtn) {
+
+        hideAllBtn.addEventListener(
+            'click',
+            function () {
+
+                fields.forEach(function (f) {
+
+                    if (!f.toggle) {
+                        return;
+                    }
+
+                    const toggle =
+                        document.getElementById(
+                            f.toggle
+                        );
+
+                    toggle.checked = false;
+
+                    applyField(f);
+                });
+            }
+        );
+    }
+
+
+    // =========================================================
+    // DEFAULT FONT SETTINGS
+    // =========================================================
+
+    const nameElement =
+        document.getElementById('elName');
+
+    if (nameElement) {
+
+        nameElement.style.fontWeight = '700';
+
+        nameElement.style.textTransform =
+            'uppercase';
+    }
+
+
+    const schoolNameElement =
+        document.getElementById(
+            'elSchoolName'
+        );
+
+    if (schoolNameElement) {
+
+        schoolNameElement.style.fontWeight =
+            '700';
+    }
+
+
+    // =========================================================
+    // QR CODE
+    // =========================================================
+
+    const qrDataInput =
+        document.getElementById('qrData');
+
+    function updateQr() {
+
+        if (!qrDataInput) {
+            return;
+        }
+
+        const value =
+            encodeURIComponent(
+                qrDataInput.value || ''
+            );
+
+        const qr =
+            document.getElementById('elQr');
+
+        if (qr) {
+
+            qr.src =
+                'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='
+                + value;
+        }
+    }
+
+
+    if (qrDataInput) {
+
+        qrDataInput.addEventListener(
+            'input',
+            updateQr
+        );
+
+        updateQr();
+    }
+
+
+    // =========================================================
+    // PHOTO UPLOAD
+    // =========================================================
+
+    const photoUpload =
+        document.getElementById('photoUpload');
+
+    if (photoUpload) {
+
+        photoUpload.addEventListener(
+            'change',
+            function (e) {
+
+                const file =
+                    e.target.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                normalizeImage(
+                    file,
+                    function (dataUrl) {
+
+                        document.getElementById(
+                            'elPhoto'
+                        ).src = dataUrl;
+                    }
+                );
+            }
+        );
+    }
+
+
+    // =========================================================
+    // LOGO UPLOAD
+    // =========================================================
+
+    const logoUpload =
+        document.getElementById('logoUpload');
+
+    if (logoUpload) {
+
+        logoUpload.addEventListener(
+            'change',
+            function (e) {
+
+                const file =
+                    e.target.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                normalizeImage(
+                    file,
+                    function (dataUrl) {
+
+                        document.getElementById(
+                            'elLogo'
+                        ).src = dataUrl;
+                    }
+                );
+            }
+        );
+    }
+
+
+    // =========================================================
+    // SIGNATURE UPLOAD
+    // =========================================================
+
+    const signUpload =
+        document.getElementById('signUpload');
+
+    if (signUpload) {
+
+        signUpload.addEventListener(
+            'change',
+            function (e) {
+
+                const file =
+                    e.target.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                normalizeImage(
+                    file,
+                    function (dataUrl) {
+
+                        document.getElementById(
+                            'elSign'
+                        ).src = dataUrl;
+                    }
+                );
+            }
+        );
+    }
+
+
+    // =========================================================
+    // DRAG AND DROP
+    // =========================================================
+
+    let dragEl = null;
+
+    let offX = 0;
+    let offY = 0;
+
+
+    function xyControlsFor(elId) {
+
+        return fields.find(function (f) {
+
+            return f.el === elId;
+
+        });
+    }
+
+
+    document
+        .querySelectorAll('.el')
+        .forEach(function (el) {
+
+            el.addEventListener(
+                'mousedown',
+                function (e) {
+
+                    dragEl = el;
+
+                    el.classList.add(
+                        'dragging'
+                    );
+
+                    const rect =
+                        card.getBoundingClientRect();
+
+                    const scale =
+                        rect.width / CARD_W;
+
+                    offX =
+                        (
+                            e.clientX -
+                            rect.left
+                        ) / scale -
+                        parseFloat(
+                            el.style.left || 0
+                        );
+
+                    offY =
+                        (
+                            e.clientY -
+                            rect.top
+                        ) / scale -
+                        parseFloat(
+                            el.style.top || 0
+                        );
+
+                    e.preventDefault();
+                }
+            );
+        });
+
+
+    document.addEventListener(
+        'mousemove',
+        function (e) {
+
+            if (!dragEl) {
+                return;
+            }
+
+            const rect =
+                card.getBoundingClientRect();
+
+            const scale =
+                rect.width / CARD_W;
+
+            let nx =
+                Math.round(
+                    (
+                        e.clientX -
+                        rect.left
+                    ) / scale -
+                    offX
+                );
+
+            let ny =
+                Math.round(
+                    (
+                        e.clientY -
+                        rect.top
+                    ) / scale -
+                    offY
+                );
+
+            nx =
+                Math.max(
+                    0,
+                    Math.min(CARD_W, nx)
+                );
+
+            ny =
+                Math.max(
+                    0,
+                    Math.min(CARD_H, ny)
+                );
+
+            dragEl.style.left =
+                nx + 'px';
+
+            dragEl.style.top =
+                ny + 'px';
+
+
+            const f =
+                xyControlsFor(
+                    dragEl.id
+                );
+
+            if (f) {
+
+                if (f.x) {
+
+                    document.getElementById(
+                        f.x
+                    ).value = nx;
+                }
+
+                if (f.y) {
+
+                    document.getElementById(
+                        f.y
+                    ).value = ny;
+                }
+            }
+        }
+    );
+
+
+    document.addEventListener(
+        'mouseup',
+        function () {
+
+            if (dragEl) {
+
+                dragEl.classList.remove(
+                    'dragging'
+                );
+            }
+
+            dragEl = null;
+        }
+    );
+
+
+    // =========================================================
+    // COLLAPSIBLE GROUPS
+    // =========================================================
+
+    document
+        .querySelectorAll('.group-title')
+        .forEach(function (title) {
+
+            title.addEventListener(
+                'click',
+                function () {
+
+                    title.parentElement
+                        .classList.toggle(
+                            'collapsed'
+                        );
+                }
+            );
+        });
+
+
+    // =========================================================
+    // ZOOM
+    // =========================================================
+
+    const zoom =
+        document.getElementById('zoom');
+
+    const zoomVal =
+        document.getElementById('zoomVal');
+
+    if (zoom) {
+
+        zoom.addEventListener(
+            'input',
+            function () {
+
+                const scale =
+                    zoom.value / 100;
+
+                card.style.transform =
+                    'scale(' + scale + ')';
+
+                zoomVal.textContent =
+                    zoom.value + '%';
+            }
+        );
+    }
+
+
+    // =========================================================
+    // RESET
+    // =========================================================
+
+    const defaults = {};
+
+    document
+        .querySelectorAll(
+            '.controls input, .controls select'
+        )
+        .forEach(function (input) {
+
+            defaults[input.id] =
+                input.type === 'checkbox'
+                    ? input.checked
+                    : input.value;
+        });
+
+
+    const resetBtn =
+        document.getElementById('resetBtn');
+
+    if (resetBtn) {
+
+        resetBtn.addEventListener(
+            'click',
+            function () {
+
+                Object.keys(defaults)
+                    .forEach(function (id) {
+
+                        const input =
+                            document.getElementById(id);
+
+                        if (!input) {
+                            return;
+                        }
+
+                        if (
+                            input.type ===
+                            'checkbox'
+                        ) {
+
+                            input.checked =
+                                defaults[id];
+
+                        } else {
+
+                            input.value =
+                                defaults[id];
+                        }
+                    });
+
+
+                fields.forEach(
+                    applyField
+                );
+
+                updateQr();
+            }
+        );
+    }
+
+
+    // =========================================================
+    // BUILD LAYOUT JSON
+    // =========================================================
+    //
+    // IMPORTANT:
+    // OFF TOGGLE = ELEMENT IS NOT SAVED
+    //
+    // =========================================================
+
+    function buildLayoutJSON() {
+
+        const layout = {
+
+            cardWidth: CARD_W,
+
+            cardHeight: CARD_H,
+
+            background:
+                card.style.backgroundImage || '',
+
+            fields: {}
+
+        };
+
+
+        fields.forEach(function (f) {
+
+            // -----------------------------------------
+            // CHECK TOGGLE
+            // -----------------------------------------
+
+            if (f.toggle) {
+
+                const toggle =
+                    document.getElementById(
+                        f.toggle
+                    );
+
+                // OFF = DO NOT SAVE
+                if (
+                    !toggle ||
+                    !toggle.checked
+                ) {
+
+                    return;
+                }
+            }
+
+
+            const el =
+                document.getElementById(
+                    f.el
+                );
+
+            if (!el) {
+                return;
+            }
+
+
+            const item = {
+
+                x:
+                    parseFloat(
+                        el.style.left
+                    ) || 0,
+
+                y:
+                    parseFloat(
+                        el.style.top
+                    ) || 0,
+
+                visible: true
+            };
+
+
+            // -----------------------------------------
+            // WIDTH
+            // -----------------------------------------
+
+            if (f.w) {
+
+                item.width =
+                    parseFloat(
+                        el.style.width
+                    ) || 0;
+            }
+
+
+            // -----------------------------------------
+            // HEIGHT
+            // -----------------------------------------
+
+            if (f.h) {
+
+                item.height =
+                    parseFloat(
+                        el.style.height
+                    ) || 0;
+            }
+
+
+            // -----------------------------------------
+            // TEXT
+            // -----------------------------------------
+
+            if (f.text) {
+
+                const input =
+                    document.getElementById(
+                        f.text
+                    );
+
+                if (input) {
+
+                    item.text =
+                        input.value;
+                }
+            }
+
+
+            // -----------------------------------------
+            // FONT SIZE
+            // -----------------------------------------
+
+            if (f.size) {
+
+                item.fontSize =
+                    parseFloat(
+                        el.style.fontSize
+                    ) || 12;
+            }
+
+
+            // -----------------------------------------
+            // COLOR
+            // -----------------------------------------
+
+            if (f.color) {
+
+                item.color =
+                    el.style.color || '';
+            }
+
+
+            // -----------------------------------------
+            // FONT WEIGHT
+            // -----------------------------------------
+
+            if (f.weight) {
+
+                item.fontWeight =
+                    el.style.fontWeight || '400';
+            }
+
+
+            // -----------------------------------------
+            // TYPE
+            // -----------------------------------------
+
+            if (f.text) {
+
+                item.type = 'text';
+
+            } else {
+
+                item.type = 'image';
+            }
+
+
+            // -----------------------------------------
+            // SAVE ELEMENT
+            // -----------------------------------------
+
+            layout.fields[f.key] =
+                item;
+        });
+
+
+        return layout;
+    }
+
+
+    // =========================================================
+    // EXPORT LAYOUT
+    // =========================================================
+
+    const exportLayoutBtn =
+        document.getElementById(
+            'exportLayoutBtn'
+        );
+
+    if (exportLayoutBtn) {
+
+        exportLayoutBtn.addEventListener(
+            'click',
+            function () {
+
+                const layout =
+                    buildLayoutJSON();
+
+                const blob =
+                    new Blob(
+                        [
+                            JSON.stringify(
+                                layout,
+                                null,
+                                2
+                            )
+                        ],
+                        {
+                            type:
+                                'application/json'
+                        }
+                    );
+
+                const url =
+                    URL.createObjectURL(
+                        blob
+                    );
+
+                const a =
+                    document.createElement(
+                        'a'
+                    );
+
+                a.href = url;
+
+                a.download =
+                    'idcard-layout.json';
+
+                a.click();
+
+                URL.revokeObjectURL(url);
+            }
+        );
+    }
+
+
+    // =========================================================
+    // SAVE ID CARD TO DATABASE
+    // =========================================================
+
+    const saveLayoutBtn =
+        document.getElementById(
+            'saveLayoutBtn'
+        );
+
+
+    if (saveLayoutBtn) {
+
+        saveLayoutBtn.addEventListener(
+            'click',
+            async function () {
+
+                try {
+
+                    // -------------------------------------
+                    // BUILD LAYOUT
+                    // -------------------------------------
+
+                    const layout =
+                        buildLayoutJSON();
+
+
+                    console.log(
+                        'LAYOUT BEING SAVED:',
+                        layout
+                    );
+
+
+                    // -------------------------------------
+                    // CSRF
+                    // -------------------------------------
+
+                    const csrfElement =
+                        document.querySelector(
+                            'meta[name="csrf-token"]'
+                        );
+
+
+                    if (!csrfElement) {
+
+                        alert(
+                            'CSRF token not found.'
+                        );
+
+                        return;
+                    }
+
+
+                    const csrfToken =
+                        csrfElement.getAttribute(
+                            'content'
+                        );
+
+
+                    // -------------------------------------
+                    // BACKGROUND
+                    // -------------------------------------
+
+                    let background =
+                        card.style.backgroundImage ||
+                        '';
+
+
+                    // Remove url("...")
+                    if (
+                        background.startsWith(
+                            'url("'
+                        )
+                    ) {
+
+                        background =
+                            background.slice(
+                                5,
+                                -2
+                            );
+                    }
+
+
+                    // Remove url('...')
+                    else if (
+                        background.startsWith(
+                            "url('"
+                        )
+                    ) {
+
+                        background =
+                            background.slice(
+                                5,
+                                -2
+                            );
+                    }
+
+
+                    // -------------------------------------
+                    // DATA
+                    // -------------------------------------
+
+                    const data = {
+
+                        name:
+                            'Default ID Card',
+
+                        orientation:
+                            CARD_W >= CARD_H
+                                ? 'landscape'
+                                : 'portrait',
+
+                        card_width:
+                            CARD_W,
+
+                        card_height:
+                            CARD_H,
+
+                        background:
+                            background,
+
+                        layout:
+                            layout
+                    };
+
+
+                    console.log(
+                        'DATA SENT TO SERVER:',
+                        data
+                    );
+
+
+                    // -------------------------------------
+                    // BUTTON
+                    // -------------------------------------
+
+                    saveLayoutBtn.disabled =
+                        true;
+
+                    saveLayoutBtn.innerHTML =
+                        '⏳ Saving...';
+
+
+                    // -------------------------------------
+                    // SEND TO LARAVEL
+                    // -------------------------------------
+
+                    const response =
+                        await fetch(
+                            "{{ route('mainidcard.store') }}",
+                            {
+
+                                method:
+                                    'POST',
+
+                                headers: {
+
+                                    'Content-Type':
+                                        'application/json',
+
+                                    'X-CSRF-TOKEN':
+                                        csrfToken,
+
+                                    'Accept':
+                                        'application/json'
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        data
+                                    )
+                            }
+                        );
+
+
+                    // -------------------------------------
+                    // READ RESPONSE
+                    // -------------------------------------
+
+                    const result =
+                        await response.json();
+
+
+                    console.log(
+                        'SERVER RESPONSE:',
+                        result
+                    );
+
+
+                    // -------------------------------------
+                    // SUCCESS
+                    // -------------------------------------
+
+                    if (
+                        response.ok &&
+                        result.success
+                    ) {
+
+                        alert(
+                            result.message ||
+                            'ID Card saved successfully.'
+                        );
+
+                    } else {
+
+                        alert(
+                            result.message ||
+                            'Unable to save ID Card.'
+                        );
+                    }
+
+
+                } catch (error) {
+
+                    console.error(
+                        'SAVE ERROR:',
+                        error
+                    );
+
+                    alert(
+                        'Something went wrong while saving ID Card.'
+                    );
+
+
+                } finally {
+
+                    saveLayoutBtn.disabled =
+                        false;
+
+                    saveLayoutBtn.innerHTML =
+                        '💾 Save ID Card';
+                }
+
+            }
+        );
+    }
+
+
+    // =========================================================
+    // DOWNLOAD PNG
+    // =========================================================
+
+    const downloadBtn =
+        document.getElementById(
+            'downloadBtn'
+        );
+
+
+    if (downloadBtn) {
+
+        downloadBtn.addEventListener(
+            'click',
+            function () {
+
+                const previousTransform =
+                    card.style.transform;
+
+                card.style.transform =
+                    'none';
+
+
+                html2canvas(
+                    card,
+                    {
+                        scale: 3,
+                        useCORS: true,
+                        backgroundColor: null
+                    }
+                )
+                .then(function (canvas) {
+
+                    card.style.transform =
+                        previousTransform;
+
+
+                    const link =
+                        document.createElement(
+                            'a'
+                        );
+
+                    link.download =
+                        'id-card.png';
+
+                    link.href =
+                        canvas.toDataURL(
+                            'image/png'
+                        );
+
+                    link.click();
+
+                })
+                .catch(function (error) {
+
+                    card.style.transform =
+                        previousTransform;
+
+                    console.error(error);
+
+                    alert(
+                        'Could not export image.'
+                    );
+                });
+            }
+        );
+    }
+
 
 })();
 </script>
-
 </body>
 </html>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Mainidcard;
 
 class School extends Model
 {
@@ -22,4 +23,8 @@ class School extends Model
         'principal_signature',
 
     ];
+    public function mainidcards()
+    {
+        return $this->hasMany(Mainidcard::class);
+    }
 }

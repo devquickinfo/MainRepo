@@ -20,10 +20,12 @@
     }
 
     .id-card-template {
-        width: 350px;
+        width: auto;
         max-width: 100%;
-        height: auto;
+        /* height: auto; */
         display: block;
+        max-height: 300px;
+
     }
 
 </style>
